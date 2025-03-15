@@ -1,27 +1,25 @@
 import flet as ft
 
 def main(page: ft.Page):
-    page.title = "Flet counter example"
+    page.title = "ContactHarmony"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
-    txt_number = ft.TextField(value="0", text_align=ft.TextAlign.RIGHT, width=100)
+    TEXT_SIZE = 16
 
-    def minus_click(e):
-        txt_number.value = str(int(txt_number.value) - 1)
-        page.update()
-
-    def plus_click(e):
-        txt_number.value = str(int(txt_number.value) + 1)
+    def connect_account_click(e):
+        #TODO
         page.update()
 
     page.add(
-        ft.Row(
+        ft.Column(
             [
-                ft.IconButton(ft.Icons.REMOVE, on_click=minus_click),
-                txt_number,
-                ft.IconButton(ft.Icons.ADD, on_click=plus_click),
+                ft.Text(value="No contacts backed-up. Connect an account to get started!",
+                        size=TEXT_SIZE),
+                ft.ElevatedButton("Connect Account", icon=ft.Icons.ADD, on_click=connect_account_click),
             ],
             alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
     )
 
