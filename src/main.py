@@ -5,7 +5,7 @@ class ContactHarmonyApp(AppLayout):
     def __init__(self, page: ft.Page):
         self.page = page
         self.appbar = ft.AppBar(
-            leading=ft.Icon(ft.Icons.ACCOUNT_CIRCLE),
+            leading=ft.Icon(ft.Icons.ACCOUNT_CIRCLE, size=48),
             leading_width=100,
             title=ft.Text("ContactHarmony",size=32, text_align="start"),
             center_title=False,
@@ -55,8 +55,7 @@ class ContactHarmonyApp(AppLayout):
                     ft.ElevatedButton(text="Connect", on_click=close_dlg),
                 ],
                 tight=True,
-            ),
-            on_dismiss=lambda e: print("Modal dialog dismissed!"),
+            )
         )
         self.page.open(dialog)
 
