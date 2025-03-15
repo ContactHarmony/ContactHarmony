@@ -8,7 +8,7 @@ authors = [
     { name = "David Genis" }
     { name = "Tom Kaplan" }
     { name = "Juan Ruiz" }
-    { name = "Nathaniel Garrett}
+    { name = "Nathaniel Garrett"}
 ]
 dependencies = [
   "flet==0.27.6"
