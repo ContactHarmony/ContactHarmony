@@ -6,11 +6,11 @@ from xml.etree import ElementTree as ET
 # Base URL for CardDAV server
 BASE_URL = "https://www.google.com/carddav/v1/principals"
 # Add gmail to @gmail.com by your actual Gmail email address
-USERNAME = "xxxxxxxxxx@gmail.com"
+    #USERNAME = "infoserach@gmail.com"
 #Enable 2FA and generate Application Password. You can't use your main Google password
-PASSWORD = "16-character Application password"
+    #PASSWORD = "kugo yrkq yxnp lcno"
 # Construct the CardDAV URL
-CARD_DAV_URL = f"{BASE_URL}/{USERNAME}/lists/default/"
+#CARD_DAV_URL = f"{BASE_URL}/{USERNAME}/lists/default/"
 
 OUTPUT_DIR = "./contacts_google"  # Directory to save .vcf files
 
@@ -46,7 +46,7 @@ def save_contact(filename, content, combined_file):
     #     vcf_file.write(cleaned_content)
     # print(f"Saved contact to {filepath}")
 
-def fetch_contacts_list():
+def fetch_contacts_list(gmail, applicationPassword):
     """
     Fetch the list of contact URLs from the address book.
     """
@@ -63,8 +63,10 @@ def fetch_contacts_list():
       </d:prop>
     </d:propfind>"""
 
+    CARD_DAV_URL = f"{BASE_URL}/{gmail}/lists/default/"
+
     response = requests.request(
-        "PROPFIND", CARD_DAV_URL, auth=(USERNAME, PASSWORD), headers=headers, data=body
+        "PROPFIND", CARD_DAV_URL, auth=(gmail, applicationPassword), headers=headers, data=body
     )
 
     if response.status_code not in [200, 207]:
@@ -84,12 +86,12 @@ def fetch_contacts_list():
 
     return hrefs
 
-def fetch_contact(href, combined_file):
+def fetch_contact(href, combined_file, gmail, applicationPassword):
     """
     Fetch a single contact and add it to the combined file.
     """
     url = "https://www.google.com" + href
-    response = requests.get(url, auth=(USERNAME, PASSWORD))
+    response = requests.get(url, auth=(gmail, applicationPassword))
 
     if response.status_code == 200:
         vcard_content = response.content.decode("utf-8")
@@ -99,6 +101,24 @@ def fetch_contact(href, combined_file):
         print(f"Failed to fetch contact {href}: {response.status_code}")
         print(response.content.decode("utf-8"))
 
+
+def get_google_contacts(gmail, applicationPassword):
+    # make sure output directory exists and create file
+    OUTPUT_DIR = "./contacts_google"
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
+    combined_file_path = os.path.join(OUTPUT_DIR, "contacts_combined.vcf")
+
+    # Create or clear the combined file
+    with open(combined_file_path, "w", encoding="utf-8") as combined_vcf:
+        combined_vcf.write("")  # Start with an empty file
+
+    hrefs = fetch_contacts_list(gmail, applicationPassword)
+    print(f"Found {len(hrefs)} contacts.")
+    for href in hrefs:
+        fetch_contact(href, combined_file_path, gmail, applicationPassword)
+
+'''
 if __name__ == "__main__":
     combined_file_path = os.path.join(OUTPUT_DIR, "contacts_combined.vcf")
 
@@ -110,3 +130,4 @@ if __name__ == "__main__":
     print(f"Found {len(hrefs)} contacts.")
     for href in hrefs:
         fetch_contact(href, combined_file_path)
+'''

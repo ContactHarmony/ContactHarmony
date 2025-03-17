@@ -1,5 +1,6 @@
 import flet as ft
 from app_layout import AppLayout
+import getGoogleContacts as ggc
 
 class ContactHarmonyApp(AppLayout):
     def __init__(self, page: ft.Page):
@@ -61,6 +62,7 @@ class ContactHarmonyApp(AppLayout):
 
     def fetch_contacts(self, gmail, applicationPassword):
         #TODO
+        ggc.get_google_contacts(gmail, applicationPassword)
         return True
 
 if __name__ == "__main__":
