@@ -1,6 +1,6 @@
 import flet as ft
 from app_layout import AppLayout
-import getGoogleContacts as ggc
+import getGoogleContacts as googleApp
 
 class ContactHarmonyApp(AppLayout):
     def __init__(self, page: ft.Page):
@@ -40,7 +40,9 @@ class ContactHarmonyApp(AppLayout):
                 self.page.update()
                 return
             else:
-                self.fetch_contacts(fieldEmail.value, fieldApplicationPassword.value)
+                # when info entered & button clicked, attempt to fetch contacts.
+                #   on fail, do something. idk yet
+                result = self.fetch_contacts(fieldEmail.value, fieldApplicationPassword.value)
                 self.page.close(dialog)
                 self.page.update()
 
@@ -61,9 +63,9 @@ class ContactHarmonyApp(AppLayout):
         self.page.open(dialog)
 
     def fetch_contacts(self, gmail, applicationPassword):
-        #TODO
-        ggc.get_google_contacts(gmail, applicationPassword)
-        return True
+        #get_google_contacts returns True for success and False for failure, which is stored in result
+        result = googleApp.get_google_contacts(gmail, applicationPassword)
+        return result
 
 if __name__ == "__main__":
  
