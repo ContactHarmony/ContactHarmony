@@ -11,4 +11,4 @@ To build the application, execute the following steps:
 4. The application is now ready to be run using the following terminal command at the root folder: ```python src/main.py```
 ### Unit Tests
 To run the unit tests for this application, type the following terminal command at the root folder:
-```pytest tests/test.py```
+```pytest src/test.py```

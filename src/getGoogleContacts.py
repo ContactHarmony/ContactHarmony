@@ -97,9 +97,11 @@ def fetch_contact(href, combined_file, gmail, applicationPassword):
         vcard_content = response.content.decode("utf-8")
         filename = href.split("/")[-1]
         save_contact(filename, vcard_content, combined_file)
+        return True
     else:
         print(f"Failed to fetch contact {href}: {response.status_code}")
         print(response.content.decode("utf-8"))
+        return False
 
 
 def get_google_contacts(gmail, applicationPassword):
@@ -109,14 +111,19 @@ def get_google_contacts(gmail, applicationPassword):
         os.makedirs(OUTPUT_DIR)
     combined_file_path = os.path.join(OUTPUT_DIR, "contacts_combined.vcf")
 
+    hrefs = fetch_contacts_list(gmail, applicationPassword)
+    if hrefs == []:
+        return False
+
     # Create or clear the combined file
     with open(combined_file_path, "w", encoding="utf-8") as combined_vcf:
         combined_vcf.write("")  # Start with an empty file
 
-    hrefs = fetch_contacts_list(gmail, applicationPassword)
+    # Get contacts 1-by-1
     print(f"Found {len(hrefs)} contacts.")
     for href in hrefs:
         fetch_contact(href, combined_file_path, gmail, applicationPassword)
+    return True
 
 '''
 if __name__ == "__main__":
