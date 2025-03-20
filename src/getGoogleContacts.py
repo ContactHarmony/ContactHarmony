@@ -83,12 +83,12 @@ def fetch_contacts_list(gmail, applicationPassword):
         href = response.find("d:href", ns)
         if href is not None:
             hrefs.append(href.text)
-
     return hrefs
 
 def fetch_contact(href, combined_file, gmail, applicationPassword):
     """
     Fetch a single contact and add it to the combined file.
+    False for failure, True for success
     """
     url = "https://www.google.com" + href
     response = requests.get(url, auth=(gmail, applicationPassword))
@@ -120,8 +120,9 @@ def get_google_contacts(gmail, applicationPassword):
         combined_vcf.write("")  # Start with an empty file
 
     # Get contacts 1-by-1
-    print(f"Found {len(hrefs)} contacts.")
-    for href in hrefs:
+    print(f"Found {len(hrefs)-1} contacts.")
+    print(hrefs)
+    for href in hrefs[1:]:
         fetch_contact(href, combined_file_path, gmail, applicationPassword)
     return True
 
