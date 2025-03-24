@@ -5,7 +5,7 @@ import vobject
 
 class ContactManager():
     def __init__(self):
-        self.backupDir = "./backups"
+        self.defaultBackupDir = "./backups"
         self.connectedAccounts = {}
     
     def connect_account(self, account: Account):
@@ -13,21 +13,26 @@ class ContactManager():
 
         status = False
         if account in self.connectedAccounts:
-            backupPath = self.connectedAccounts[account]
+            backupDirectory = os.path.dirname(self.connectedAccounts[account])
+            backupFileName = os.path.basename(self.connectedAccounts[account])
         else:
-            backupPath = self.generate_default_path(account)
+            backupDirectory = self.defaultBackupDir
+            backupFileName = self.generate_file_name(account)
 
         # call appropriate API to fetch contacts from service
         match account.service:
             case "google":
-                status = google.get_google_contacts(account.address, account.applicationPassword, backupPath) #TODO update this function to take in a target file!
+                status = google.get_google_contacts(account.address, account.applicationPassword, backupDirectory, backupFileName)
             case _:
                 raise Exception(account.service + " support not implemented!")
         
+        newPath = os.path.join(backupDirectory, backupFileName)
+
         if status == True:
-            self.connectedAccounts[account] = backupPath
+            self.connectedAccounts[account] = newPath
         else:
-            os.remove(backupPath)   #TODO if used on existing account, return to previous version
+            if os.path.exists(newPath):
+                os.remove(newPath)   #TODO if used on existing account, return to previous version
             raise Exception(f"Failed to fetch contacts from {account.address}")
 
     def get_connected_accounts(self):
@@ -42,9 +47,9 @@ class ContactManager():
         vcfContact = vobject.readOne(vcfFile)
         return None
     
-    def generate_default_path(self, account: Account):
+    def generate_file_name(self, account: Account):
         '''return the default path for a given account'''
-        return os.path.join(self.backupDir, f"{account.service}_{account.address.partition('@')[0]}.vcf")
+        return f"{account.service}_{account.address.partition('@')[0]}.vcf"
     
     def refresh(self):
         '''refetch contacts for all connected accounts'''
