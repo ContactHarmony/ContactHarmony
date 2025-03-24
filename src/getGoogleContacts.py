@@ -104,12 +104,11 @@ def fetch_contact(href, combined_file, gmail, applicationPassword):
         return False
 
 
-def get_google_contacts(gmail, applicationPassword):
+def get_google_contacts(gmail, applicationPassword, directory, fname):
     # make sure output directory exists and create file
-    OUTPUT_DIR = "./contacts_google"
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
-    combined_file_path = os.path.join(OUTPUT_DIR, "contacts_combined.vcf")
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    combined_file_path = os.path.join(directory, fname)
 
     hrefs = fetch_contacts_list(gmail, applicationPassword)
     if hrefs == []:
