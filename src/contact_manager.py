@@ -15,7 +15,7 @@ class ContactManager():
         if account in self.connectedAccounts:
             backupPath = self.connectedAccounts[account]
         else:
-            backupPath = os.path.join(self.backupDir, f"{account.service}_{account.address.partition("@")[0]}.vcf"())
+            backupPath = self.generate_default_path(account)
 
         # call appropriate API to fetch contacts from service
         match account.service:
@@ -41,6 +41,10 @@ class ContactManager():
         vcfFile = open(self.connectedAccounts[account])
         vcfContact = vobject.readOne(vcfFile)
         return None
+    
+    def generate_default_path(self, account: Account):
+        '''return the default path for a given account'''
+        return os.path.join(self.backupDir, f"{account.service}_{account.address.partition("@")[0]}.vcf")
     
     def refresh(self):
         '''refetch contacts for all connected accounts'''
