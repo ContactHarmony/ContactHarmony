@@ -44,7 +44,7 @@ class ContactManager():
     
     def generate_default_path(self, account: Account):
         '''return the default path for a given account'''
-        return os.path.join(self.backupDir, f"{account.service}_{account.address.partition("@")[0]}.vcf")
+        return os.path.join(self.backupDir, f"{account.service}_{account.address.partition('@')[0]}.vcf")
     
     def refresh(self):
         '''refetch contacts for all connected accounts'''
