@@ -1,9 +1,12 @@
 import flet as ft
 from app_layout import AppLayout
+from contact_manager import ContactManager
+from helpers import Account
 import getGoogleContacts as googleApp
 
 class ContactHarmonyApp(AppLayout):
     def __init__(self, page: ft.Page):
+        self.contactManager = ContactManager()
         self.page = page
         self.appbar = ft.AppBar(
             leading=ft.Icon(ft.Icons.ACCOUNT_CIRCLE, size=48),
@@ -42,7 +45,7 @@ class ContactHarmonyApp(AppLayout):
             else:
                 # when info entered & button clicked, attempt to fetch contacts.
                 #   on fail, do something. idk yet
-                result = self.fetch_contacts(fieldEmail.value, fieldApplicationPassword.value)
+                result = self.add_account("google", fieldEmail.value, fieldApplicationPassword.value)
                 self.page.close(dialog)
                 self.page.update()
 
@@ -62,10 +65,11 @@ class ContactHarmonyApp(AppLayout):
         )
         self.page.open(dialog)
 
-    def fetch_contacts(self, gmail, applicationPassword):
-        #get_google_contacts returns True for success and False for failure, which is stored in result
-        result = googleApp.get_google_contacts(gmail, applicationPassword)
-        return result
+    def add_account(self, service, gmail, applicationPassword):
+        # ContactManager's connect_account doesn't return anything so now this doesn't either
+        newAccount = Account(service, gmail, applicationPassword)
+        self.contactManager.connect_account(newAccount)
+        return
 
 if __name__ == "__main__":
  
