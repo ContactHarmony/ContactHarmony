@@ -36,9 +36,10 @@ class ContactHarmonyApp(AppLayout):
         )
     
     def connect_account(self, e):
+        #TODO make it so you can choose type of account to connect
         def close_dlg(e):
             if fieldEmail.value == "" or fieldApplicationPassword.value == "":
-                fieldEmail.error_text = "Please provide Gmail Address"
+                fieldEmail.error_text = "Please provide e-mail address"
                 fieldApplicationPassword.error_text = "Please provide password"
                 self.page.update()
                 return
@@ -49,11 +50,11 @@ class ContactHarmonyApp(AppLayout):
                 self.page.close(dialog)
                 self.page.update()
 
-        fieldEmail = ft.TextField(label="Gmail Address")
+        fieldEmail = ft.TextField(label="E-mail Address")
         fieldApplicationPassword = ft.TextField(label="Application Password", password=True)
 
         dialog = ft.AlertDialog(
-            title=ft.Text("Please enter your Gmail address and application password"),
+            title=ft.Text("Please enter your e-mail address and application password"),
             content=ft.Column(
                 [
                     fieldEmail,
@@ -68,8 +69,12 @@ class ContactHarmonyApp(AppLayout):
     def add_account(self, service, gmail, applicationPassword):
         # ContactManager's connect_account doesn't return anything so now this doesn't either
         newAccount = Account(service, gmail, applicationPassword)
-        self.contactManager.connect_account(newAccount)
-        return
+        try:
+            self.contactManager.connect_account(newAccount)
+        except:
+            return False
+        else:
+            return True
 
 if __name__ == "__main__":
  
