@@ -1,9 +1,12 @@
 import flet as ft
 from app_layout import AppLayout
+from contact_manager import ContactManager
+from helpers import Account
 import getGoogleContacts as googleApp
 
 class ContactHarmonyApp(AppLayout):
     def __init__(self, page: ft.Page):
+        self.contactManager = ContactManager()
         self.page = page
         self.appbar = ft.AppBar(
             leading=ft.Icon(ft.Icons.ACCOUNT_CIRCLE, size=48),
@@ -33,24 +36,25 @@ class ContactHarmonyApp(AppLayout):
         )
     
     def connect_account(self, e):
+        #TODO make it so you can choose type of account to connect
         def close_dlg(e):
             if fieldEmail.value == "" or fieldApplicationPassword.value == "":
-                fieldEmail.error_text = "Please provide Gmail Address"
+                fieldEmail.error_text = "Please provide e-mail address"
                 fieldApplicationPassword.error_text = "Please provide password"
                 self.page.update()
                 return
             else:
                 # when info entered & button clicked, attempt to fetch contacts.
                 #   on fail, do something. idk yet
-                result = self.fetch_contacts(fieldEmail.value, fieldApplicationPassword.value)
+                result = self.add_account("google", fieldEmail.value, fieldApplicationPassword.value)
                 self.page.close(dialog)
                 self.page.update()
 
-        fieldEmail = ft.TextField(label="Gmail Address")
+        fieldEmail = ft.TextField(label="E-mail Address")
         fieldApplicationPassword = ft.TextField(label="Application Password", password=True)
 
         dialog = ft.AlertDialog(
-            title=ft.Text("Please enter your Gmail address and application password"),
+            title=ft.Text("Please enter your e-mail address and application password"),
             content=ft.Column(
                 [
                     fieldEmail,
@@ -62,10 +66,15 @@ class ContactHarmonyApp(AppLayout):
         )
         self.page.open(dialog)
 
-    def fetch_contacts(self, gmail, applicationPassword):
-        #get_google_contacts returns True for success and False for failure, which is stored in result
-        result = googleApp.get_google_contacts(gmail, applicationPassword)
-        return result
+    def add_account(self, service, gmail, applicationPassword):
+        # ContactManager's connect_account doesn't return anything so now this doesn't either
+        newAccount = Account(service, gmail, applicationPassword)
+        try:
+            self.contactManager.connect_account(newAccount)
+        except:
+            return False
+        else:
+            return True
 
 if __name__ == "__main__":
  
