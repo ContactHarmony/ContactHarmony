@@ -34,6 +34,10 @@ class ContactManager():
             if os.path.exists(newPath):
                 os.remove(newPath)   #TODO if used on existing account, return to previous version
             raise Exception(f"Failed to fetch contacts from {account.address}")
+        
+    def get_supported_services(self):
+        '''return a list of supported services'''
+        return ['google'] #TODO change to return ['google', 'yahoo', 'icloud']
 
     def get_connected_accounts(self):
         '''returns a list of connected accounts'''

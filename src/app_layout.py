@@ -10,7 +10,122 @@ class AppLayout(ft.Row):
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
-        self.controls = [self.active_view]
+
+        self.account_view: ft.Control = ft.Column(
+            [
+                ft.Row(
+                    [
+                        ft.Container(
+                            ft.Text(
+                                value="Your Backups",
+                                theme_style=ft.TextThemeStyle.HEADLINE_MEDIUM,
+                            ),
+                            expand=True,
+                            padding=ft.padding.only(top=15),
+                        ),
+                        ft.Container(
+                            ft.FilledTonalButton(
+                                "Connect Account",
+                                icon=ft.Icons.ADD,
+                                on_click=self.app.connect_account,
+                            ),
+                            padding=ft.padding.only(right=50, top=15),
+                        )
+                    ]
+                ),
+                ft.Row([ft.Text("No connected accounts")]),
+            ]
+        )
+
+        self.controls = [self.account_view]
+        
+#         self.page.add(
+#             ft.Card(
+#                 content = ft.Container(
+#                     content = ft.Column(
+#                         [
+#                             ft.Markdown("""### Google
+# exampleaddress@gmail.com"""),
+#                             ft.Row(
+#                                 [
+#                                     ft.IconButton(
+#                                         icon = ft.Icons.DELETE_FOREVER,
+#                                         icon_color = "pink500",
+#                                         icon_size = 25,
+#                                         tooltip = "Detach Account"
+#                                     ),
+#                                     ft.IconButton(
+#                                         icon = ft.Icons.PERSON_SEARCH,
+#                                         icon_color = "blue200",
+#                                         icon_size = 25,
+#                                         tooltip = "View Contacts"
+#                                     ),
+#                                 ],
+#                                 spacing = 10,
+#                                 alignment = ft.MainAxisAlignment.END
+#                             )
+#                         ],
+#                         spacing = 0
+#                     ),
+#                     padding = 10
+#                 ),
+#                 margin = 10,
+#                 width = 250
+#             )
+#         )
+#         self.page.add(
+#             ft.Card(
+#                 content = ft.Container(
+#                     ft.Row(
+#                         [
+#                             ft.Markdown("""### Google
+# exampleaddress@gmail.com"""),
+#                             ft.IconButton(
+#                                 icon = ft.Icons.DELETE_FOREVER,
+#                                 icon_color = "pink500",
+#                                 icon_size = 25,
+#                                 tooltip = "Detach Account"
+#                             ),
+#                             ft.IconButton(
+#                                 icon = ft.Icons.PERSON_SEARCH,
+#                                 icon_color = "blue200",
+#                                 icon_size = 25,
+#                                 tooltip = "View Contacts"
+#                             ),
+#                         ],
+#                         spacing = 10,
+#                         alignment = ft.MainAxisAlignment.START
+#                     ),
+#                     padding = 10
+#                 ),
+#                 margin = 10,
+#                 width = 335
+#             )
+#         )
+#         self.page.add(
+#             ft.Card(
+#                 content = ft.Container(
+#                     content = ft.Column(
+#                         [
+#                             ft.Markdown("""### Google
+# exampleaddress@gmail.com"""),
+#                             ft.Row(
+#                                 [
+#                                     ft.OutlinedButton(text="Detach Account"),
+#                                     ft.OutlinedButton(text="View Contacts")
+#                                 ],
+#                                 spacing = 10,
+#                                 alignment = ft.MainAxisAlignment.END
+#                             )
+#                         ]
+#                     ),
+#                     padding = 10
+#                 ),
+#                 margin = 10,
+#                 width = 400
+#             )
+#         )
+#         self.controls = [self.active_view]
 
     @property
     def active_view(self):
@@ -21,7 +136,50 @@ class AppLayout(ft.Row):
         self._active_view = view
         self.update()
 
-    def toggle_nav_rail(self, e):
-        self.sidebar.visible = not self.sidebar.visible
-        self.toggle_nav_rail_button.selected = not self.toggle_nav_rail_button.selected
-        self.page.update()
+    def set_account_view(self):
+        self.active_view = self.account_view
+
+    def load_account_cards(self):
+        self.account_view.controls[-1] = ft.Row(
+            [
+                ft.Card(
+                    content = ft.Container(
+                        content = ft.Column(
+                            [
+                                ft.Text(
+                                    a.service.title(),
+                                    theme_style=ft.TextThemeStyle.HEADLINE_SMALL
+                                ),
+                                ft.Text(
+                                    a.address
+                                ),
+                                ft.Row(
+                                    [
+                                        ft.TextButton(
+                                            "Browse Contacts",
+                                            icon = ft.Icons.PERSON_SEARCH,
+                                            icon_color = "blue200",
+                                            tooltip = "Browse Contacts"
+                                        ),
+                                        ft.IconButton(
+                                            icon = ft.Icons.DELETE_FOREVER,
+                                            icon_color = "pink500",
+                                            tooltip = "Detach Account",
+                                            on_click = lambda _ : self.app.remove_account(a)
+                                        ),
+                                    ],
+                                    spacing = 10,
+                                    alignment = ft.MainAxisAlignment.END
+                                )
+                            ],
+                            spacing = 5
+                        ),
+                        padding = 10
+                    ),
+                    margin = 10,
+                    width = 250
+               )
+                for a in self.app.contactManager.get_connected_accounts()
+            ],
+            wrap=True,
+        )
