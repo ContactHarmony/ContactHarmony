@@ -16,13 +16,13 @@ class ContactHarmonyApp(AppLayout):
             toolbar_height=75,
             bgcolor=ft.Colors.LIGHT_BLUE_ACCENT_700,
             actions=[
-                ft.Container(
-                    content=ft.FilledTonalButton(
-                        "Connect Account",
-                        on_click=self.connect_account
-                    ),
-                    margin=ft.margin.only(left=50, right=25)
-                )
+                # ft.Container(
+                #     content=ft.FilledTonalButton(
+                #         "Connect Account",
+                #         on_click=self.connect_account
+                #     ),
+                #     margin=ft.margin.only(left=50, right=25)
+                # )
             ],
         )
         self.page.appbar = self.appbar
@@ -49,6 +49,7 @@ class ContactHarmonyApp(AppLayout):
                 result = self.add_account(dropdownService.value, fieldEmail.value, fieldApplicationPassword.value)
                 if result == True:
                     self.page.close(dialog)
+                    self.load_account_cards()
                     self.page.update()
                 else:
                     fieldEmail.error_text = "Error, failed to fetch contacts"
@@ -100,8 +101,7 @@ class ContactHarmonyApp(AppLayout):
         else:
             return True
         
-    def load_account_cards():
-        pass
+    
 
 if __name__ == "__main__":
  
