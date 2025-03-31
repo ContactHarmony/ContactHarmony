@@ -58,7 +58,7 @@ class Contact:
 						else:
 								self.current_vcard.append(line)
 
-				def save_vcard(self, vcard):
+def save_vcard(self, vcard):
 					# After a vcard is parsed through, the contents are added to the class
 					first_name = vcard.contents('fn')
 					for tel in vcard.contents['tel']:

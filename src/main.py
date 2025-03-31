@@ -16,13 +16,13 @@ class ContactHarmonyApp(AppLayout):
             toolbar_height=75,
             bgcolor=ft.Colors.LIGHT_BLUE_ACCENT_700,
             actions=[
-                ft.Container(
-                    content=ft.FilledTonalButton(
-                        "Connect Account",
-                        on_click=self.connect_account
-                    ),
-                    margin=ft.margin.only(left=50, right=25)
-                )
+                # ft.Container(
+                #     content=ft.FilledTonalButton(
+                #         "Connect Account",
+                #         on_click=self.connect_account
+                #     ),
+                #     margin=ft.margin.only(left=50, right=25)
+                # )
             ],
         )
         self.page.appbar = self.appbar
@@ -46,9 +46,33 @@ class ContactHarmonyApp(AppLayout):
             else:
                 # when info entered & button clicked, attempt to fetch contacts.
                 #   on fail, do something. idk yet
-                result = self.add_account("google", fieldEmail.value, fieldApplicationPassword.value)
-                self.page.close(dialog)
-                self.page.update()
+                result = self.add_account(dropdownService.value, fieldEmail.value, fieldApplicationPassword.value)
+                if result == True:
+                    self.page.close(dialog)
+                    self.load_account_cards()
+                    self.page.update()
+                else:
+                    fieldEmail.error_text = "Error, failed to fetch contacts"
+                    fieldApplicationPassword.error_text = "Try a different e-mail or password"
+                    self.page.update()
+                    return
+
+        def get_service_options():
+            options = []
+            for service in self.contactManager.get_supported_services():
+                options.append(
+                    ft.DropdownOption(
+                        key=service,
+                        text=service.title(),
+                    )
+                )
+            return options
+        
+        dropdownService = ft.Dropdown(
+            editable=True,
+            label="Service",
+            options=get_service_options()
+        )
 
         fieldEmail = ft.TextField(label="E-mail Address")
         fieldApplicationPassword = ft.TextField(label="Application Password", password=True)
@@ -57,12 +81,15 @@ class ContactHarmonyApp(AppLayout):
             title=ft.Text("Please enter your e-mail address and application password"),
             content=ft.Column(
                 [
+                    dropdownService,
                     fieldEmail,
                     fieldApplicationPassword,
-                    ft.ElevatedButton(text="Connect", on_click=close_dlg),
                 ],
                 tight=True,
-            )
+            ),
+            actions=[
+                ft.ElevatedButton(text="Connect", on_click=close_dlg)
+            ]
         )
         self.page.open(dialog)
 
@@ -75,6 +102,26 @@ class ContactHarmonyApp(AppLayout):
             return False
         else:
             return True
+        
+    def remove_account(self, account):
+        def close_dlg(e):
+            self.page.close(dialog)
+            if e.control.text != "No":
+                self.contactManager.remove_account(account)
+                self.load_account_cards()
+            self.page.update()
+
+        dialog = ft.AlertDialog(
+            title=ft.Text("Removal Confirmation"),
+            content=ft.Text(f"Are you sure you want to remove the backup for {account.service.title()} account {account.address}? This action cannot be undone."),
+            actions=[
+                ft.TextButton("No", on_click=close_dlg),
+                ft.TextButton("Yes", on_click=close_dlg)
+            ]
+        )
+        self.page.open(dialog)
+        
+    
 
 if __name__ == "__main__":
  
