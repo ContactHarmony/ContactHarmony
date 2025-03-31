@@ -58,4 +58,4 @@ class Contact:
 
 				def parse_property(self, line):
 						# Parse individual property line
-						
+						pass
