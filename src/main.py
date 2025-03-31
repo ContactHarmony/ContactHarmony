@@ -84,10 +84,12 @@ class ContactHarmonyApp(AppLayout):
                     dropdownService,
                     fieldEmail,
                     fieldApplicationPassword,
-                    ft.ElevatedButton(text="Connect", on_click=close_dlg),
                 ],
                 tight=True,
-            )
+            ),
+            actions=[
+                ft.ElevatedButton(text="Connect", on_click=close_dlg)
+            ]
         )
         self.page.open(dialog)
 
@@ -100,6 +102,24 @@ class ContactHarmonyApp(AppLayout):
             return False
         else:
             return True
+        
+    def remove_account(self, account):
+        def close_dlg(e):
+            self.page.close(dialog)
+            if e.control.text != "No":
+                self.contactManager.remove_account(account)
+                self.load_account_cards()
+            self.page.update()
+
+        dialog = ft.AlertDialog(
+            title=ft.Text("Removal Confirmation"),
+            content=ft.Text(f"Are you sure you want to remove the backup for {account.service.title()} account {account.address}? This action cannot be undone."),
+            actions=[
+                ft.TextButton("No", on_click=close_dlg),
+                ft.TextButton("Yes", on_click=close_dlg)
+            ]
+        )
+        self.page.open(dialog)
         
     
 

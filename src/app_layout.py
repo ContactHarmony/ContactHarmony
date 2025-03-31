@@ -159,12 +159,13 @@ class AppLayout(ft.Row):
                                             "Browse Contacts",
                                             icon = ft.Icons.PERSON_SEARCH,
                                             icon_color = "blue200",
-                                            tooltip = "Browse Contacts",
+                                            tooltip = "Browse Contacts"
                                         ),
                                         ft.IconButton(
                                             icon = ft.Icons.DELETE_FOREVER,
                                             icon_color = "pink500",
-                                            tooltip = "Detach Account"
+                                            tooltip = "Detach Account",
+                                            on_click = lambda _ : self.app.remove_account(a)
                                         ),
                                     ],
                                     spacing = 10,
