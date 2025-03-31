@@ -53,9 +53,20 @@ class Contact:
 						elif line.startswith("END:VCARD"):
 								self.current_vcard.append(line)
 								vcard=vobject.readOne(self.current_vcard)
+								self.save_vcard(vcard)
 						else:
 								self.current_vcard.append(line)
 
-				def parse_property(self, line):
-						# Parse individual property line
-						
+				def save_vcard(self, vcard):
+					# After a vcard is parsed through, the contents are added to the class
+					first_name = vcard.contents('fn')
+					for tel in vcard.contents['tel']:
+						currentPhone = ContactPhone(tel.value, tel.type)
+						self.phones.append(currentPhone)
+					for email in vcard.contents['email']:
+						currentEmail = ContactEmail(email.value, email.type)
+						self.emails.append(currentEmail)
+					organization = vcard.contents('org')
+					title = vcard.contents('title')
+					note = vcard.contents('note')
+					birthday = vcard.contents('bday')
