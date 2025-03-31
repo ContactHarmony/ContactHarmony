@@ -69,7 +69,7 @@ class ContactHarmonyApp(AppLayout):
             return options
         
         dropdownService = ft.Dropdown(
-            editable=True,
+            editable=False,
             label="Service",
             options=get_service_options()
         )
