@@ -50,6 +50,7 @@ class Contact:
 						if line.startswith("BEGIN:VCARD"):
 								self.current_contact = Contact()
 								self.current_vcard = []
+								self.current_vcard.append(line)
 						elif line.startswith("END:VCARD"):
 								self.current_vcard.append(line)
 								vcard=vobject.readOne(self.current_vcard)
