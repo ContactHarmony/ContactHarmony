@@ -1,73 +1,75 @@
-import re
 import vobject
-from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import List
 
 @dataclass
 class ContactPhone:
-	number: str
-	type: str
+    number: str
+    type: str
 
 @dataclass
 class ContactEmail:
-	email: str
-	type: str
+    email: str
+    type: str
 
 @dataclass
 class Contact:
-	first_name: str
-	last_name: str
-	phones: List[ContactPhone] = field(default_factory=list)
-	emails: List[ContactEmail] = field(default_factory=list)
-	organization: str = ''
-	title: str = ''
-	note: str = ''
-	birthday: str = ''
+    first_name: str = ''
+    last_name: str = ''
+    full_name: str = ''
+    phones: List[ContactPhone] = field(default_factory=list)
+    emails: List[ContactEmail] = field(default_factory=list)
+    organization: str = ''
+    title: str = ''
+    note: str = ''
+    birthday: str = ''
 
 class VCF_parser:
-	def __init__(self):
-		self.contacts = List[Contact] # list of contacts
-		self.current_contact = None
-		self.current_vcard = [] # text of current vcard
-		self.property_name = None
-		self.property_params = None
-		self.property_value = None
+    def __init__(self):
+        self.contacts = [] #Initializing the list of contacts
+        self.current_contact = None
+        self.current_vcard = []
 
-	def parse_file(self, filename):
-		# Parse contacts from a VCF file
-		with open(filename, "r", encoding="utf-8") as f:
-			return self.parse(f.read())
+	# Parse contacts from a VCF file
+    def parse_file(self, filename):
+        with open(filename, "r", encoding="utf-8") as f:
+            return self.parse(f.read())
 
-	def parse(self, vcf_content):
-		# Parse contact on a per line basis
-		for line in vcf_content.split("\n"):
-			self.parse_line(line)
-		return self.contacts
+	# Parse contact on a per line basis
+    def parse(self, vcf_content):
+        for line in vcf_content.split("\n"):
+            self.parse_line(line)
+        return self.contacts
 
-	def parse_line(self, line):
-		# Parse single line
-		if line.startswith("BEGIN:VCARD"):
-			self.current_contact = Contact()
-			self.current_vcard = []
-			self.current_vcard.append(line)
-		elif line.startswith("END:VCARD"):
-			self.current_vcard.append(line)
-			vcard=vobject.readOne(self.current_vcard)
-			self.save_vcard(vcard)
-		else:
-			self.current_vcard.append(line)
+	# Parse single line
+    def parse_line(self, line):
+        if line.startswith("BEGIN:VCARD"):
+            self.current_contact = Contact()
+            self.current_vcard = []
+        self.current_vcard.append(line)
+        if line.startswith("END:VCARD"):
+            vcard = vobject.readOne("\n".join(self.current_vcard))
+            self.save_vcard(vcard)
 
-	def save_vcard(self, vcard):
-		# After a vcard is parsed through, the contents are added to the class
-		first_name = vcard.contents('fn')
-		for tel in vcard.contents['tel']:
-			currentPhone = ContactPhone(tel.value, tel.type)
-			self.phones.append(currentPhone)
-		for email in vcard.contents['email']:
-			currentEmail = ContactEmail(email.value, email.type)
-			self.emails.append(currentEmail)
-		organization = vcard.contents('org')
-		title = vcard.contents('title')
-		note = vcard.contents('note')
-		birthday = vcard.contents('bday')
+	# Extracting the contact information from the vCard
+    def save_vcard(self, vcard):
+        self.current_contact.full_name = vcard.contents.get('fn', [None])[0].value if 'fn' in vcard.contents else ''
+
+        # Extract phone numbers
+        for tel in vcard.contents.get('tel', []):
+            currentPhone = ContactPhone(tel.value, tel.params.get('TYPE', ['unknown'])[0])
+            self.current_contact.phones.append(currentPhone)
+
+        # Extract emails
+        for email in vcard.contents.get('email', []):
+            currentEmail = ContactEmail(email.value, email.params.get('TYPE', ['unknown'])[0])
+            self.current_contact.emails.append(currentEmail)
+
+        # Extract optional fields
+        self.current_contact.organization = vcard.contents.get('org', [None])[0].value if 'org' in vcard.contents else ''
+        self.current_contact.title = vcard.contents.get('title', [None])[0].value if 'title' in vcard.contents else ''
+        self.current_contact.note = vcard.contents.get('note', [None])[0].value if 'note' in vcard.contents else ''
+        self.current_contact.birthday = vcard.contents.get('bday', [None])[0].value if 'bday' in vcard.contents else ''
+
+        # Add the contact to the list
+        self.contacts.append(self.current_contact)

@@ -1,8 +1,23 @@
 import pytest
 import os
+import vobject
 import getGoogleContacts as google
+import VCFparser as vcfp
 from helpers import Account
 from contact_manager import ContactManager
+
+SAMPLE_VCARD = """BEGIN:VCARD
+VERSION:3.0
+N:Fakename;Stacey;;;
+FN:Stacey Fakename
+REV:2025-03-19T19:25:20Z
+UID:32c9e360b37a10e
+BDAY;VALUE=DATE:1921-06-12
+item2.TEL;TYPE=PREF:+9312345678900
+item1.EMAIL;TYPE=PREF:fake@fake.com
+item1.X-ABLabel:
+item2.X-ABLabel:
+END:VCARD\n"""
 
 # class TestGoogle():
 #     def test_get_google_contacts_false(self):
@@ -64,3 +79,10 @@ class TestContactManager():
         contactManager.remove_account(account)
         assert account not in contactManager.connectedAccounts
         assert os.path.exists(backupPath) == False
+
+class TestVCFparser():
+    def test_save_vcard(self):
+        test_parser = vcfp.VCF_parser()
+        vcf = vobject.readOne(SAMPLE_VCARD)
+        test_parser.save_vcard(vcf)
+        assert True == True
