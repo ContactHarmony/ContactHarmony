@@ -23,8 +23,20 @@ class ContactPage(ft.View):
                 )
             ]
         )
-        self.controls = []
+        self.controls = [ft.Row()]
+        self.populate_contacts()
 
     def unlookit(self):
         self.page.views.pop()
         self.page.update()
+    
+    def populate_contacts(self):
+        # stub, will need to access contacts
+        self.controls[0].controls.append(ContactListView("Demo McContactsson"))
+
+# temp build, bare minimum
+class ContactListView(ft.TextButton):
+    def __init__(self, contactName):
+        super().__init__()
+        self.text = contactName
+        self.size = 20

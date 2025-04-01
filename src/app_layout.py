@@ -58,10 +58,6 @@ class AppLayout(ft.Row):
         self.page.views.append(ContactPage())
         self.page.update()
 
-    def unlookit_contacts(self):
-        self.page.views.pop()
-        self.page.update()
-
     def load_account_cards(self):
         self.account_view.controls[-1] = ft.Row(
             [
