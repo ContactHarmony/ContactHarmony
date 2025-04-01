@@ -1,4 +1,5 @@
 import flet as ft
+from contact_page import ContactPage
 
 class AppLayout(ft.Row):
     def __init__(self, app, page: ft.Page, *args, **kwargs):
@@ -37,95 +38,9 @@ class AppLayout(ft.Row):
             ]
         )
 
+        # self.contact_view = ContactPage()
+
         self.controls = [self.account_view]
-        
-#         self.page.add(
-#             ft.Card(
-#                 content = ft.Container(
-#                     content = ft.Column(
-#                         [
-#                             ft.Markdown("""### Google
-# exampleaddress@gmail.com"""),
-#                             ft.Row(
-#                                 [
-#                                     ft.IconButton(
-#                                         icon = ft.Icons.DELETE_FOREVER,
-#                                         icon_color = "pink500",
-#                                         icon_size = 25,
-#                                         tooltip = "Detach Account"
-#                                     ),
-#                                     ft.IconButton(
-#                                         icon = ft.Icons.PERSON_SEARCH,
-#                                         icon_color = "blue200",
-#                                         icon_size = 25,
-#                                         tooltip = "View Contacts"
-#                                     ),
-#                                 ],
-#                                 spacing = 10,
-#                                 alignment = ft.MainAxisAlignment.END
-#                             )
-#                         ],
-#                         spacing = 0
-#                     ),
-#                     padding = 10
-#                 ),
-#                 margin = 10,
-#                 width = 250
-#             )
-#         )
-#         self.page.add(
-#             ft.Card(
-#                 content = ft.Container(
-#                     ft.Row(
-#                         [
-#                             ft.Markdown("""### Google
-# exampleaddress@gmail.com"""),
-#                             ft.IconButton(
-#                                 icon = ft.Icons.DELETE_FOREVER,
-#                                 icon_color = "pink500",
-#                                 icon_size = 25,
-#                                 tooltip = "Detach Account"
-#                             ),
-#                             ft.IconButton(
-#                                 icon = ft.Icons.PERSON_SEARCH,
-#                                 icon_color = "blue200",
-#                                 icon_size = 25,
-#                                 tooltip = "View Contacts"
-#                             ),
-#                         ],
-#                         spacing = 10,
-#                         alignment = ft.MainAxisAlignment.START
-#                     ),
-#                     padding = 10
-#                 ),
-#                 margin = 10,
-#                 width = 335
-#             )
-#         )
-#         self.page.add(
-#             ft.Card(
-#                 content = ft.Container(
-#                     content = ft.Column(
-#                         [
-#                             ft.Markdown("""### Google
-# exampleaddress@gmail.com"""),
-#                             ft.Row(
-#                                 [
-#                                     ft.OutlinedButton(text="Detach Account"),
-#                                     ft.OutlinedButton(text="View Contacts")
-#                                 ],
-#                                 spacing = 10,
-#                                 alignment = ft.MainAxisAlignment.END
-#                             )
-#                         ]
-#                     ),
-#                     padding = 10
-#                 ),
-#                 margin = 10,
-#                 width = 400
-#             )
-#         )
-#         self.controls = [self.active_view]
 
     @property
     def active_view(self):
@@ -138,6 +53,14 @@ class AppLayout(ft.Row):
 
     def set_account_view(self):
         self.active_view = self.account_view
+    
+    def lookit_contacts(self):
+        self.page.views.append(ContactPage())
+        self.page.update()
+
+    def unlookit_contacts(self):
+        self.page.views.pop()
+        self.page.update()
 
     def load_account_cards(self):
         self.account_view.controls[-1] = ft.Row(
@@ -159,7 +82,8 @@ class AppLayout(ft.Row):
                                             "Browse Contacts",
                                             icon = ft.Icons.PERSON_SEARCH,
                                             icon_color = "blue200",
-                                            tooltip = "Browse Contacts"
+                                            tooltip = "Browse Contacts",
+                                            on_click = lambda _ : self.lookit_contacts()
                                         ),
                                         ft.IconButton(
                                             icon = ft.Icons.DELETE_FOREVER,
