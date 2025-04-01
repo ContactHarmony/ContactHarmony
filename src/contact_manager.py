@@ -24,7 +24,7 @@ class ContactManager():
             case "google":
                 status = google.get_google_contacts(account.address, account.applicationPassword, backupDirectory, backupFileName)
             case _:
-                raise Exception(account.service + " support not implemented!")
+                raise Exception(f"{account.service} support not implemented!")
         
         newPath = os.path.join(backupDirectory, backupFileName)
 
