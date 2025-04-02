@@ -78,7 +78,7 @@ def fetch_contacts(email, application_password):
 
     return hrefs
 
-def fetch_contact_data(hrefs, combined_file, gmail, applicationPassword):
+def fetch_contact_data(hrefs, combined_file, email, application_password):
     """
     Fetch the data for a single contact and return it as text.
     """
@@ -90,7 +90,7 @@ def fetch_contact_data(hrefs, combined_file, gmail, applicationPassword):
         contact_full_url = combined_file.rstrip("/") + "/" + hrefs.lstrip("/")
 
     print(f"Fetching contact: {contact_full_url}")
-    response = requests.get(contact_full_url, auth=(gmail, applicationPassword))
+    response = requests.get(contact_full_url, auth=(email, application_password))
 
     if response.status_code == 200:
         return clean_vcard(response.text)  # Clean the vCard data
@@ -99,13 +99,13 @@ def fetch_contact_data(hrefs, combined_file, gmail, applicationPassword):
         print(response.content.decode("utf-8"))
         return None
 
-def save_contacts_to_file(hrefs, combined_file):
+def save_contacts_to_file(hrefs, combined_file, email, application_password):
     """
     Save all contact data into a single VCF file.
     """
     with open(combined_file, "w", encoding="utf-8") as f:
         for href in hrefs:
-            contact_data = fetch_contact_data(href)
+            contact_data = fetch_contact_data(href, combined_file, email, application_password)
             if contact_data:
                 f.write(contact_data)
                 f.write("\n")  # Ensure each contact is separated by a newline
@@ -125,7 +125,7 @@ def get_yahoo_contacts(email, application_password, directory, fname):
         return False
 
     # save all contacts into a single file
-    save_contacts_to_file(hrefs, combined_file_path)
+    save_contacts_to_file(hrefs, combined_file_path, email, application_password)
     return True
 
 
