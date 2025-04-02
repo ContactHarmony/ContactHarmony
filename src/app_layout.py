@@ -89,7 +89,7 @@ class AppLayout(ft.Row):
                         padding = 10
                     ),
                     margin = 10,
-                    width = 250
+                    width = 300
                )
                 for a in self.app.contactManager.get_connected_accounts()
             ],

@@ -5,7 +5,7 @@ class Account():
         self.applicationPassword = applicationPassword
 
     def __eq__(self, other):
-        return (self.service == other.service and self.address == other.address and self.applicationPassword == other.applicationPassword)
+        return (self.service == other.service and self.address == other.address)
     def __hash__(self):
         return hash(self.applicationPassword)
     
