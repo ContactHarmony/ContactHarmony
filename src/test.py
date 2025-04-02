@@ -183,11 +183,11 @@ class TestYahoo():
         result = yahoo.get_yahoo_contacts(ACCOUNT_YAHOO_VALID.address, ACCOUNT_YAHOO_VALID.applicationPassword, get_temp_dir(tmp_path), 'temp.vcf')
         assert result == True
         
-    def test_fetch_contacts_list_wrong_info_should_return(self):
+    def test_yahoo_fetch_contacts_list_wrong_info_should_return(self):
         hrefs_test = yahoo.fetch_contacts(ACCOUNT_YAHOO_INVALID.address, ACCOUNT_YAHOO_INVALID.applicationPassword)
         assert hrefs_test == []
 
-    def test_get_google_contacts_correct_backup(self):
+    def test_get_yahoo_contacts_correct_backup(self):
         dir = './backups'
         yahoo.get_yahoo_contacts(ACCOUNT_YAHOO_VALID.address, ACCOUNT_YAHOO_VALID.applicationPassword, dir, 'temp.vcf')
         assert open(os.path.join(dir, 'temp.vcf')).read() == SAMPLE_VCARD_YAHOO
