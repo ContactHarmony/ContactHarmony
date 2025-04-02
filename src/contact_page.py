@@ -3,8 +3,9 @@ from contact_manager import ContactManager
 from helpers import Account
 
 class ContactPage(ft.View):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, page: ft.Page):
+        super().__init__()
+        self.page = page
         self.appbar = ft.AppBar(
             leading=ft.Icon(ft.Icons.ACCOUNT_CIRCLE, size=48),
             leading_width=100,
@@ -15,7 +16,7 @@ class ContactPage(ft.View):
             actions = [
                 ft.Container(
                     content = ft.FilledTonalButton(
-                        "Back",
+                        text = "Back",
                         icon = ft.Icons.ARROW_BACK,
                         on_click = lambda _ : self.unlookit()
                     ),
@@ -23,7 +24,11 @@ class ContactPage(ft.View):
                 )
             ]
         )
-        self.controls = [ft.Row()]
+        self.controls = [ft.ListView(
+            controls = [],
+            spacing = 2,
+            divider_thickness = 2
+        )]
         self.populate_contacts()
 
     def unlookit(self):
@@ -31,12 +36,17 @@ class ContactPage(ft.View):
         self.page.update()
     
     def populate_contacts(self):
-        # stub, will need to access contacts
-        self.controls[0].controls.append(ContactListView("Demo McContactsson"))
+        # stub, will need to access contacts, iterate through them
+        for i in range(5):
+            self.controls[0].controls.append(ContactListTile("Demo McContactsson's Clone #%i" % (i)))
+        self.page.update()
 
 # temp build, bare minimum
-class ContactListView(ft.TextButton):
+class ContactListTile(ft.ListTile):
     def __init__(self, contactName):
         super().__init__()
-        self.text = contactName
-        self.size = 20
+        self.title = ft.Text(contactName)
+        self.trailing = ft.FilledTonalButton(
+            icon = ft.Icons.SEARCH,
+            text = "View Contact"
+        )

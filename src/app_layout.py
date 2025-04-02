@@ -55,7 +55,7 @@ class AppLayout(ft.Row):
         self.active_view = self.account_view
     
     def lookit_contacts(self):
-        self.page.views.append(ContactPage())
+        self.page.views.append(ContactPage(self.page))
         self.page.update()
 
     def load_account_cards(self):
