@@ -1,5 +1,5 @@
 import flet as ft
-from contact_page import ContactPage
+from contact_page import ContactListPage
 
 class AppLayout(ft.Row):
     def __init__(self, app, page: ft.Page, *args, **kwargs):
@@ -38,8 +38,6 @@ class AppLayout(ft.Row):
             ]
         )
 
-        # self.contact_view = ContactPage()
-
         self.controls = [self.account_view]
 
     @property
@@ -55,7 +53,7 @@ class AppLayout(ft.Row):
         self.active_view = self.account_view
     
     def lookit_contacts(self):
-        self.page.views.append(ContactPage(self.page))
+        self.page.views.append(ContactListPage(self.page))
         self.page.update()
 
     def load_account_cards(self):
