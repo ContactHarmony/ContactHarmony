@@ -5,14 +5,15 @@ from xml.etree import ElementTree as ET
 # Replace xxxxxxxxx@yahoo.com by your actual Yahoo email address
 # You can use also other Yahoo domains like
 # yahoo.ca, yahoo.jp, yahoo.in, yahoo.co.uk, yahoo.co.il, myyahoo.com, currently.com, att.net
-USERNAME = "xxxxxxxxx@yahoo.com" # or xxxxxx@yahoo.co.uk or xxxxxx@currently.com etc.
+#######USERNAME = "xxxxxxxxx@yahoo.com" # or xxxxxx@yahoo.co.uk or xxxxxx@currently.com etc.
 
 #This is "Application Password", not a main Yahoo Account password
-PASSWORD = "application_password_16_digits"  # Replace with your application-specific password
+#######PASSWORD = "application_password_16_digits"  # Replace with your application-specific password
 
 # CardDAV server details. It is not a base URL, but Address Book URL
-CARD_DAV_URL = f"https://carddav.address.yahoo.com/dav/{USERNAME}/Contacts/"
+#######CARD_DAV_URL = f"https://carddav.address.yahoo.com/dav/{USERNAME}/Contacts/"
 
+BASE_URL = "https://carddav.address.yahoo.com/dav"
 
 # Directory to save the contacts
 OUTPUT_DIR = "./contacts_yahoo"
@@ -29,9 +30,7 @@ PROPFIND_BODY = """<?xml version="1.0" encoding="UTF-8"?>
 </d:propfind>
 """
 
-# Ensure the output directory exists
-if not os.path.exists(OUTPUT_DIR):
-    os.makedirs(OUTPUT_DIR)
+
 
 def clean_vcard(vcard_data):
     """
@@ -41,7 +40,7 @@ def clean_vcard(vcard_data):
     cleaned_lines = [line for line in lines if line.strip()]  # Remove empty or whitespace-only lines
     return "\n".join(cleaned_lines)
 
-def fetch_contacts():
+def fetch_contacts(email, application_password):
     """
     Fetch the list of contacts from the CardDAV server.
     """
@@ -54,7 +53,7 @@ def fetch_contacts():
     response = requests.request(
         "PROPFIND",
         CARD_DAV_URL,
-        auth=(USERNAME, PASSWORD),
+        auth=(email, application_password),
         headers=headers,
         data=PROPFIND_BODY,
     )
@@ -111,10 +110,29 @@ def save_contacts_to_file(contacts, output_file):
 
     print(f"Contacts saved to {output_file}")
 
-if __name__ == "__main__":
+def get_yahoo_contacts(email, application_password, directory, fname):
+    # make sure directory exists and create file
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    combined_file_path = os.path.join(directory, fname)
+
+    # fetch the list of contacts
+    contacts = fetch_contacts(email, application_password)
+    print(f"Found {len(contacts)} contacts.")
+
+    # Create or clear the combined file
+    with open(combined_file_path, "w", encoding="utf-8") as combined_vcf:
+        combined_vcf.write("")  # Start with an empty file
+
+    # save all contacts into a single file
+    save_contacts_to_file(contacts, combined_vcf)
+
+
+
+"""if __name__ == "__main__":
     # Fetch the list of contacts
     contacts = fetch_contacts()
     print(f"Found {len(contacts)} contacts.")
 
     # Save all contacts into a single file
-    save_contacts_to_file(contacts, OUTPUT_FILE)
+    save_contacts_to_file(contacts, OUTPUT_FILE)"""

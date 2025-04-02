@@ -1,13 +1,39 @@
 import pytest
 import os
 import shutil
+import vobject
 import getGoogleContacts as google
 from helpers import Account
 from contact_manager import ContactManager
-
+import VCFparser as vcfp
 
 ACCOUNT_GOOGLE_INVALID = Account('google', 'fake_email@fake.com', 'rweqhgdfsamvb432')
 ACCOUNT_GOOGLE_VALID = Account('google', 'd6genis@gmail.com', 'thyyjvntdrkfydhn')
+
+SAMPLE_VCARD = """BEGIN:VCARD
+VERSION:3.0
+N:Fakename;Stacey;;;
+FN:Stacey Fakename
+REV:2025-03-19T19:25:20Z
+UID:32c9e360b37a10e
+BDAY;VALUE=DATE:1921-06-12
+item2.TEL;TYPE=PREF:+9312345678900
+item1.EMAIL;TYPE=PREF:fake@fake.com
+item1.X-ABLabel:
+item2.X-ABLabel:
+END:VCARD"""
+
+SAMPLE_VCARD_NO_FN = """BEGIN:VCARD
+VERSION:3.0
+N:Fakename;Stacey;;;
+REV:2025-03-19T19:25:20Z
+UID:32c9e360b37a10e
+BDAY;VALUE=DATE:1921-06-12
+item2.TEL;TYPE=PREF:+9312345678900
+item1.EMAIL;TYPE=PREF:fake@fake.com
+item1.X-ABLabel:
+item2.X-ABLabel:
+END:VCARD\n"""
 
 def get_temp_dir(tmp_path):
     return tmp_path / "test_output"
@@ -25,19 +51,7 @@ class TestGoogle():
     def test_get_google_contacts_correct_backup(self, tmp_path):
         dir = get_temp_dir(tmp_path)
         google.get_google_contacts(ACCOUNT_GOOGLE_VALID.address, ACCOUNT_GOOGLE_VALID.applicationPassword, dir, 'temp.vcf')
-        correct = """BEGIN:VCARD
-    VERSION:3.0
-    N:Fakename;Stacey;;;
-    FN:Stacey Fakename
-    REV:2025-03-19T19:25:20Z
-    UID:32c9e360b37a10e
-    BDAY;VALUE=DATE:1921-06-12
-    item2.TEL;TYPE=PREF:+9312345678900
-    item1.EMAIL;TYPE=PREF:fake@fake.com
-    item1.X-ABLabel:
-    item2.X-ABLabel:
-    END:VCARD\n"""
-        assert open(os.path.join(dir, 'temp.vcf')).read() == correct
+        assert open(os.path.join(dir, 'temp.vcf')).read() == SAMPLE_VCARD
 
     def test_fetch_contacts_list_wrong_info_should_return(self):
         hrefs_test = google.fetch_contacts_list(ACCOUNT_GOOGLE_INVALID.address, ACCOUNT_GOOGLE_INVALID.applicationPassword)
@@ -92,3 +106,52 @@ class TestContactManager():
             with pytest.raises(Exception) as exc:
                 contactManager.connect_account(account)
             assert str(exc.value) != f"{service} support not implemented!"
+
+class TestVCFparser():
+    def test_save_vcard_full_name(self):
+        test_parser = vcfp.VCF_parser()
+        vcf = vobject.readOne(SAMPLE_VCARD)
+        first_name = vcf.contents['fn'][0].value if 'fn' in vcf.contents else ''
+        test_parser.save_vcard(vcf)
+        assert first_name == test_parser.contacts[0].full_name
+
+    def test_save_vcard_full_name_with_no_fn(self):
+        test_parser = vcfp.VCF_parser()
+        vcf = vobject.readOne(SAMPLE_VCARD_NO_FN)
+        first_name_empty = vcf.contents['fn'][0].value if 'fn' in vcf.contents else ''
+        test_parser.save_vcard(vcf)
+        assert first_name_empty == test_parser.contacts[0].full_name
+
+    def test_save_vcard_email(self):
+        test_parser = vcfp.VCF_parser()
+        vcard = vobject.readOne(SAMPLE_VCARD)
+        for email in vcard.contents.get('email', []):
+            test_email = email.value
+        test_parser.save_vcard(vcard)
+        email_from_parser = test_parser.contacts[0].emails[0].email     # gets value of the first email
+        assert test_email == email_from_parser
+
+    # Does parse_line() save test correctly?
+    def test_parse_line_works(self):
+        test_parser = vcfp.VCF_parser()
+        line = 'BEGIN:VCARD'
+        test_parser.parse_line(line)
+        parsed_line = "".join(test_parser.current_vcard) # Turns list into string
+        assert parsed_line == line
+
+    # does parse() return Contact list? This also tests if it is able to take more than one contact,
+    # hence why it checks for the [1]st element in the contact array
+    def test_parse_returns_contacts(self):
+        test_parser = vcfp.VCF_parser()
+        test_parser.parse("BEGIN:VCARD\nEND:VCARD")
+        test_contact_output = test_parser.parse(SAMPLE_VCARD)
+        assert test_contact_output[1].first_name == 'Stacey'
+        assert test_contact_output[1].last_name == 'Fakename'
+        assert test_contact_output[1].full_name == 'Stacey Fakename'
+        assert test_contact_output[1].phones[0].number == '+9312345678900'
+        assert test_contact_output[1].emails[0].email == 'fake@fake.com'
+        assert test_contact_output[1].organization == ''
+        assert test_contact_output[1].title == ''
+        assert test_contact_output[1].note == ''
+        assert test_contact_output[1].birthday == '1921-06-12'
+

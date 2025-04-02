@@ -53,13 +53,16 @@ class VCF_parser:
 
 	# Extracting the contact information from the vCard
     def save_vcard(self, vcard):
+        self.current_contact.first_name = vcard.contents['n'][0].value.given if 'n' in vcard.contents else ''
+
+        self.current_contact.last_name = vcard.contents['n'][0].value.family if 'n' in vcard.contents else ''
+
         self.current_contact.full_name = vcard.contents['fn'][0].value if 'fn' in vcard.contents else ''
 
         # Extract phone numbers
         for tel in vcard.contents.get('tel', []):
             currentPhone = ContactPhone(tel.value, tel.params.get('TYPE', ['unknown'])[0])
             self.current_contact.phones.append(currentPhone)
-            print(currentPhone)
 
         # Extract emails
         for email in vcard.contents.get('email', []):
