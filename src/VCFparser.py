@@ -27,7 +27,7 @@ class Contact:
 class VCF_parser:
     def __init__(self):
         self.contacts = [] #Initializing the list of contacts
-        self.current_contact = None
+        self.current_contact = Contact()
         self.current_vcard = []
 
 	# Parse contacts from a VCF file
@@ -53,12 +53,13 @@ class VCF_parser:
 
 	# Extracting the contact information from the vCard
     def save_vcard(self, vcard):
-        self.current_contact.full_name = vcard.contents.get('fn', [None])[0].value if 'fn' in vcard.contents else ''
+        self.current_contact.full_name = vcard.contents['fn'][0].value if 'fn' in vcard.contents else ''
 
         # Extract phone numbers
         for tel in vcard.contents.get('tel', []):
             currentPhone = ContactPhone(tel.value, tel.params.get('TYPE', ['unknown'])[0])
             self.current_contact.phones.append(currentPhone)
+            print(currentPhone)
 
         # Extract emails
         for email in vcard.contents.get('email', []):

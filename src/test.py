@@ -19,6 +19,18 @@ item1.X-ABLabel:
 item2.X-ABLabel:
 END:VCARD\n"""
 
+SAMPLE_VCARD_NO_FN = """BEGIN:VCARD
+VERSION:3.0
+N:Fakename;Stacey;;;
+REV:2025-03-19T19:25:20Z
+UID:32c9e360b37a10e
+BDAY;VALUE=DATE:1921-06-12
+item2.TEL;TYPE=PREF:+9312345678900
+item1.EMAIL;TYPE=PREF:fake@fake.com
+item1.X-ABLabel:
+item2.X-ABLabel:
+END:VCARD\n"""
+
 # class TestGoogle():
 #     def test_get_google_contacts_false(self):
 #         result = google.get_google_contacts("fake_email@fake.com", "rweqhgdfsamvb432")
@@ -81,8 +93,21 @@ class TestContactManager():
         assert os.path.exists(backupPath) == False
 
 class TestVCFparser():
-    def test_save_vcard(self):
+    def test_save_vcard_full_name(self):
         test_parser = vcfp.VCF_parser()
         vcf = vobject.readOne(SAMPLE_VCARD)
+        first_name = vcf.contents['fn'][0].value if 'fn' in vcf.contents else ''
         test_parser.save_vcard(vcf)
-        assert True == True
+        assert first_name == test_parser.contacts[0].full_name
+
+    def test_save_vcard_full_name_with_no_fn(self):
+        test_parser = vcfp.VCF_parser()
+        vcf = vobject.readOne(SAMPLE_VCARD_NO_FN)
+        first_name_empty = vcf.contents['fn'][0].value if 'fn' in vcf.contents else ''
+        test_parser.save_vcard(vcf)
+        assert first_name_empty == test_parser.contacts[0].full_name
+
+    def test_save_vcard_email(self):
+        test_parser = vcfp.VCF_parser()
+        vcard = vobject.readOne(SAMPLE_VCARD)
+        #first_email = vcard.contents[]
