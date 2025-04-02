@@ -4,6 +4,8 @@ Contact Harmony is a desktop application designed to save, organize, and backup 
 
 There is not yet an installation for Contact Harmony, so you must follow the Build instructions below. It does not yet save your contacts.
 
+To get your application password for a google account, follow google's guide [here](https://support.google.com/accounts/answer/185833?hl=en) or follow the link [here](https://myaccount.google.com/apppasswords).
+
 ## Build
 To build the application, execute the following steps:
 1. Set up Python 3.10
