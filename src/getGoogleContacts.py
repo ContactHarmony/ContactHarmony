@@ -12,13 +12,6 @@ BASE_URL = "https://www.google.com/carddav/v1/principals"
 # Construct the CardDAV URL
 #CARD_DAV_URL = f"{BASE_URL}/{USERNAME}/lists/default/"
 
-OUTPUT_DIR = "./contacts_google"  # Directory to save .vcf files
-
-
-# Ensure output directory exists
-if not os.path.exists(OUTPUT_DIR):
-    os.makedirs(OUTPUT_DIR)
-
 def clean_vcard(content):
     """
     Normalize line endings in vCard content.

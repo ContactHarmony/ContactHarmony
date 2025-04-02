@@ -4,8 +4,8 @@ import getGoogleContacts as google
 import vobject
 
 class ContactManager():
-    def __init__(self):
-        self.defaultBackupDir = "./backups"
+    def __init__(self, backup_dir = "./backups"):
+        self.defaultBackupDir = backup_dir
         self.connectedAccounts = {}
     
     def connect_account(self, account: Account):
