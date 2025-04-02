@@ -11,7 +11,7 @@ class ContactHarmonyApp(AppLayout):
         self.appbar = ft.AppBar(
             leading=ft.Icon(ft.Icons.ACCOUNT_CIRCLE, size=48),
             leading_width=100,
-            title=ft.Text("ContactHarmony",size=32, text_align="start"),
+            title=ft.Text("Contact Harmony",size=32, text_align="start"),
             center_title=False,
             toolbar_height=75,
             bgcolor=ft.Colors.LIGHT_BLUE_ACCENT_700,
