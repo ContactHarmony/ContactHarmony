@@ -24,10 +24,13 @@ class ContactPage(ft.View):
                 )
             ]
         )
-        self.controls = [ft.ListView(
-            controls = [],
-            spacing = 2,
-            divider_thickness = 2
+        self.controls = [ft.Container(
+            height = 500,
+            content = ft.ListView(
+                controls = [],
+                spacing = 2,
+                divider_thickness = 2
+            )
         )]
         self.populate_contacts()
 
@@ -37,8 +40,8 @@ class ContactPage(ft.View):
     
     def populate_contacts(self):
         # stub, will need to access contacts, iterate through them
-        for i in range(5):
-            self.controls[0].controls.append(ContactListTile("Demo McContactsson's Clone #%i" % (i)))
+        for i in range(20):
+            self.controls[0].content.controls.append(ContactListTile("Demo McContactsson's Clone #%i" % (i)))
         self.page.update()
 
 # temp build, bare minimum
