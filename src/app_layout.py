@@ -1,4 +1,5 @@
 import flet as ft
+from contact_page import ContactListPage
 
 class AppLayout(ft.Row):
     def __init__(self, app, page: ft.Page, *args, **kwargs):
@@ -50,6 +51,10 @@ class AppLayout(ft.Row):
 
     def set_account_view(self):
         self.active_view = self.account_view
+    
+    def lookit_contacts(self):
+        self.page.views.append(ContactListPage(self.page))
+        self.page.update()
 
     def load_account_cards(self):
         self.account_view.controls[-1] = ft.Row(
@@ -71,7 +76,8 @@ class AppLayout(ft.Row):
                                             "Browse Contacts",
                                             icon = ft.Icons.PERSON_SEARCH,
                                             icon_color = "blue200",
-                                            tooltip = "Browse Contacts"
+                                            tooltip = "Browse Contacts",
+                                            on_click = lambda _ : self.lookit_contacts()
                                         ),
                                         ft.IconButton(
                                             icon = ft.Icons.DELETE_FOREVER,

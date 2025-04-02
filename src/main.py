@@ -34,6 +34,7 @@ class ContactHarmonyApp(AppLayout):
             expand=True,
             vertical_alignment=ft.CrossAxisAlignment.START,
         )
+
     
     def connect_account(self, e):
         #TODO make it so you can choose type of account to connect
