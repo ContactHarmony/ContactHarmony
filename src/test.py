@@ -3,12 +3,16 @@ import os
 import shutil
 import vobject
 import getGoogleContacts as google
+import getYahooContacts as yahoo
 from helpers import Account
 from contact_manager import ContactManager
 import VCFparser as vcfp
 
 ACCOUNT_GOOGLE_INVALID = Account('google', 'fake_email@fake.com', 'rweqhgdfsamvb432')
 ACCOUNT_GOOGLE_VALID = Account('google', 'd6genis@gmail.com', 'thyyjvntdrkfydhn')
+
+ACCOUNT_YAHOO_INVALID = Account('yahoo', 'fake_email@yahoo.com', 'rweqhgdfsamvb432')
+ACCOUNT_YAHOO_VALID = Account('yahoo', 'contactharmony@yahoo.com', 'fxhakkkkcriljlhj')
 
 SAMPLE_VCARD = """BEGIN:VCARD
 VERSION:3.0
@@ -21,7 +25,7 @@ item2.TEL;TYPE=PREF:+9312345678900
 item1.EMAIL;TYPE=PREF:fake@fake.com
 item1.X-ABLabel:
 item2.X-ABLabel:
-END:VCARD"""
+END:VCARD\n"""
 
 SAMPLE_VCARD_NO_FN = """BEGIN:VCARD
 VERSION:3.0
@@ -34,6 +38,20 @@ item1.EMAIL;TYPE=PREF:fake@fake.com
 item1.X-ABLabel:
 item2.X-ABLabel:
 END:VCARD\n"""
+
+SAMPLE_VCARD_YAHOO = """BEGIN:VCARD
+VERSION:3.0
+FN:Johnny Test
+N:Test;Johnny;;;
+BDAY;VALUE=date:2002-12-05
+NOTE:Note!
+EMAIL;TYPE=INTERNET:justtesting@yahoo.com
+EMAIL;TYPE=INTERNET:johnny_test@student.uml.edu
+TEL:+19013004101
+REV:2025-04-02T20:52:45Z
+UID:contactharmony:2
+END:VCARD\n"""
+
 
 def get_temp_dir(tmp_path):
     return tmp_path / "test_output"
@@ -48,10 +66,11 @@ class TestGoogle():
         result = google.get_google_contacts(ACCOUNT_GOOGLE_VALID.address, ACCOUNT_GOOGLE_VALID.applicationPassword, get_temp_dir(tmp_path), 'temp.vcf')
         assert result == True
 
-    def test_get_google_contacts_correct_backup(self, tmp_path):
-        dir = get_temp_dir(tmp_path)
+    def test_get_google_contacts_correct_backup(self):
+        dir = './backups'
         google.get_google_contacts(ACCOUNT_GOOGLE_VALID.address, ACCOUNT_GOOGLE_VALID.applicationPassword, dir, 'temp.vcf')
         assert open(os.path.join(dir, 'temp.vcf')).read() == SAMPLE_VCARD
+        os.remove(os.path.join(dir, 'temp.vcf'))
 
     def test_fetch_contacts_list_wrong_info_should_return(self):
         hrefs_test = google.fetch_contacts_list(ACCOUNT_GOOGLE_INVALID.address, ACCOUNT_GOOGLE_INVALID.applicationPassword)
@@ -156,6 +175,24 @@ class TestVCFparser():
         assert test_contact_output[1].birthday == '1921-06-12'
 
 class TestYahoo():
-    def test_get_yahoo_contacts(self):
-        result = google.get_yahoo_contacts(ACCOUNT_GOOGLE_INVALID.address, ACCOUNT_GOOGLE_INVALID.applicationPassword, get_temp_dir(tmp_path), 'temp.vcf')
+    def test_get_yahoo_contacts(self, tmp_path):
+        result = yahoo.get_yahoo_contacts(ACCOUNT_YAHOO_INVALID.address, ACCOUNT_YAHOO_INVALID.applicationPassword, get_temp_dir(tmp_path), 'temp.vcf')
         assert result == False
+
+    def test_get_yahoo_contacts_true(self, tmp_path):
+        result = yahoo.get_yahoo_contacts(ACCOUNT_YAHOO_VALID.address, ACCOUNT_YAHOO_VALID.applicationPassword, get_temp_dir(tmp_path), 'temp.vcf')
+        assert result == True
+        
+    def test_fetch_contacts_list_wrong_info_should_return(self):
+        hrefs_test = yahoo.fetch_contacts(ACCOUNT_YAHOO_INVALID.address, ACCOUNT_YAHOO_INVALID.applicationPassword)
+        assert hrefs_test == []
+
+    def test_get_google_contacts_correct_backup(self):
+        dir = './backups'
+        yahoo.get_yahoo_contacts(ACCOUNT_YAHOO_VALID.address, ACCOUNT_YAHOO_VALID.applicationPassword, dir, 'temp.vcf')
+        assert open(os.path.join(dir, 'temp.vcf')).read() == SAMPLE_VCARD_YAHOO
+        os.remove(os.path.join(dir, 'temp.vcf'))
+    
+    def test_yahoo_fetch_contacts_correct_info(self):
+        hrefs_test = yahoo.fetch_contacts(ACCOUNT_YAHOO_VALID.address, ACCOUNT_YAHOO_VALID.applicationPassword)
+        assert hrefs_test == ['/dav/contactharmony@yahoo.com/Contacts/contactharmony:2.vcf']
