@@ -155,3 +155,7 @@ class TestVCFparser():
         assert test_contact_output[1].note == ''
         assert test_contact_output[1].birthday == '1921-06-12'
 
+class TestYahoo():
+    def test_get_yahoo_contacts(self):
+        result = google.get_yahoo_contacts(ACCOUNT_GOOGLE_INVALID.address, ACCOUNT_GOOGLE_INVALID.applicationPassword, get_temp_dir(tmp_path), 'temp.vcf')
+        assert result == False

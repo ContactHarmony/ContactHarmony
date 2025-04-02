@@ -49,6 +49,8 @@ def fetch_contacts(email, application_password):
         "Content-Type": "application/xml",
     }
 
+    CARD_DAV_URL = f"{BASE_URL}/{email}/Contacts/"
+
     print("Fetching contact list from CardDAV server...")
     response = requests.request(
         "PROPFIND",
@@ -59,56 +61,56 @@ def fetch_contacts(email, application_password):
     )
 
     if response.status_code not in [200, 207]:
-        print(f"Error fetching contacts: {response.status_code}")
+        print(f"Failed to fetch contacts list: {response.status_code}")
         print(response.content.decode("utf-8"))
         return []
 
     # Parse the response XML
     root = ET.fromstring(response.content)
     ns = {"d": "DAV:"}
-    contacts = []
+    hrefs = []
 
     # Extract hrefs for .vcf files
     for response in root.findall("d:response", ns):
         href = response.find("d:href", ns)
         if href is not None and href.text.endswith(".vcf"):
-            contacts.append(href.text)
+            hrefs.append(href.text)
 
-    return contacts
+    return hrefs
 
-def fetch_contact_data(contact_url):
+def fetch_contact_data(hrefs, combined_file, gmail, applicationPassword):
     """
     Fetch the data for a single contact and return it as text.
     """
-    if contact_url.startswith("/"):
-        contact_full_url = "https://carddav.address.yahoo.com" + contact_url
-    elif contact_url.startswith("http"):
-        contact_full_url = contact_url
+    if hrefs.startswith("/"):
+        contact_full_url = "https://carddav.address.yahoo.com" + hrefs
+    elif hrefs.startswith("http"):
+        contact_full_url = hrefs
     else:
-        contact_full_url = CARD_DAV_URL.rstrip("/") + "/" + contact_url.lstrip("/")
+        contact_full_url = combined_file.rstrip("/") + "/" + hrefs.lstrip("/")
 
     print(f"Fetching contact: {contact_full_url}")
-    response = requests.get(contact_full_url, auth=(USERNAME, PASSWORD))
+    response = requests.get(contact_full_url, auth=(gmail, applicationPassword))
 
     if response.status_code == 200:
         return clean_vcard(response.text)  # Clean the vCard data
     else:
-        print(f"Failed to fetch contact {contact_url}: {response.status_code}")
+        print(f"Failed to fetch contact {hrefs}: {response.status_code}")
         print(response.content.decode("utf-8"))
         return None
 
-def save_contacts_to_file(contacts, output_file):
+def save_contacts_to_file(hrefs, combined_file):
     """
     Save all contact data into a single VCF file.
     """
-    with open(output_file, "w", encoding="utf-8") as f:
-        for contact_url in contacts:
-            contact_data = fetch_contact_data(contact_url)
+    with open(combined_file, "w", encoding="utf-8") as f:
+        for href in hrefs:
+            contact_data = fetch_contact_data(href)
             if contact_data:
                 f.write(contact_data)
                 f.write("\n")  # Ensure each contact is separated by a newline
 
-    print(f"Contacts saved to {output_file}")
+    print(f"Contacts saved to {combined_file}")
 
 def get_yahoo_contacts(email, application_password, directory, fname):
     # make sure directory exists and create file
@@ -117,15 +119,14 @@ def get_yahoo_contacts(email, application_password, directory, fname):
     combined_file_path = os.path.join(directory, fname)
 
     # fetch the list of contacts
-    contacts = fetch_contacts(email, application_password)
-    print(f"Found {len(contacts)} contacts.")
-
-    # Create or clear the combined file
-    with open(combined_file_path, "w", encoding="utf-8") as combined_vcf:
-        combined_vcf.write("")  # Start with an empty file
+    hrefs = fetch_contacts(email, application_password)
+    print(f"Found {len(hrefs)} contacts.")
+    if hrefs == []:
+        return False
 
     # save all contacts into a single file
-    save_contacts_to_file(contacts, combined_vcf)
+    save_contacts_to_file(hrefs, combined_file_path)
+    return True
 
 
 
