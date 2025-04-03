@@ -64,11 +64,11 @@ class AppLayout(ft.Row):
                         content = ft.Column(
                             [
                                 ft.Text(
-                                    a.service.title(),
-                                    theme_style=ft.TextThemeStyle.HEADLINE_SMALL
+                                    a.address,
+                                    theme_style=ft.TextThemeStyle.LABEL_LARGE
                                 ),
                                 ft.Text(
-                                    a.address
+                                    f"{a.service.title()} account"
                                 ),
                                 ft.Row(
                                     [

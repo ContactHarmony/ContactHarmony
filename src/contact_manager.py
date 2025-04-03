@@ -1,7 +1,7 @@
 import os
 from helpers import Account
 import getGoogleContacts as google
-import vobject
+import getYahooContacts as yahoo
 from VCFparser import VCF_parser, ContactPhone, ContactEmail, Contact
 
 class ContactManager():
@@ -24,6 +24,8 @@ class ContactManager():
         match account.service:
             case "google":
                 status = google.get_google_contacts(account.address, account.applicationPassword, backupDirectory, backupFileName)
+            case "yahoo":
+                status = yahoo.get_yahoo_contacts(account.address, account.applicationPassword, backupDirectory, backupFileName)
             case _:
                 raise Exception(f"{account.service} support not implemented!")
         
@@ -38,7 +40,7 @@ class ContactManager():
         
     def get_supported_services(self):
         '''return a list of supported services'''
-        return ['google'] #TODO change to return ['google', 'yahoo', 'icloud']
+        return ['google', 'yahoo'] #TODO change to return ['google', 'yahoo', 'icloud']
 
     def get_connected_accounts(self):
         '''returns a list of connected accounts'''
@@ -46,15 +48,9 @@ class ContactManager():
     
     def get_account_contacts(self, account: Account):
         '''returns a list of account contacts'''
-        #TODO make a contact class instead of returning the raw vcf data
-        #TODO figure out vobject
         parser = VCF_parser()
-        #vcfFile = open(self.connectedAccounts[account])
         parsedContacts = parser.parse_file(self.connectedAccounts[account])
-        #vcfFile.close()
         return parsedContacts
-        # vcfContact = vobject.readOne(vcfFile)
-        # return None
     
     def generate_file_name(self, account: Account):
         '''return the default path for a given account'''
