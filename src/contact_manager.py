@@ -2,6 +2,7 @@ import os
 from helpers import Account
 import getGoogleContacts as google
 import vobject
+from VCFparser import VCF_parser, ContactPhone, ContactEmail, Contact
 
 class ContactManager():
     def __init__(self, backup_dir = "./backups"):
@@ -47,9 +48,13 @@ class ContactManager():
         '''returns a list of account contacts'''
         #TODO make a contact class instead of returning the raw vcf data
         #TODO figure out vobject
-        vcfFile = open(self.connectedAccounts[account])
-        vcfContact = vobject.readOne(vcfFile)
-        return None
+        parser = VCF_parser()
+        #vcfFile = open(self.connectedAccounts[account])
+        parsedContacts = parser.parse_file(self.connectedAccounts[account])
+        #vcfFile.close()
+        return parsedContacts
+        # vcfContact = vobject.readOne(vcfFile)
+        # return None
     
     def generate_file_name(self, account: Account):
         '''return the default path for a given account'''

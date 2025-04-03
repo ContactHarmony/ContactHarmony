@@ -52,8 +52,8 @@ class AppLayout(ft.Row):
     def set_account_view(self):
         self.active_view = self.account_view
     
-    def lookit_contacts(self):
-        self.page.views.append(ContactListPage(self.page))
+    def lookit_contacts(self, contactList):
+        self.page.views.append(ContactListPage(self.page, contactList))
         self.page.update()
 
     def load_account_cards(self):
@@ -77,7 +77,7 @@ class AppLayout(ft.Row):
                                             icon = ft.Icons.PERSON_SEARCH,
                                             icon_color = "blue200",
                                             tooltip = "Browse Contacts",
-                                            on_click = lambda _ : self.lookit_contacts()
+                                            on_click = lambda _ : self.lookit_contacts(self.app.contactManager.get_account_contacts(a))
                                         ),
                                         ft.IconButton(
                                             icon = ft.Icons.DELETE_FOREVER,
