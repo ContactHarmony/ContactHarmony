@@ -38,12 +38,11 @@ class AppLayout(ft.Row):
 
 
     def look_at(self, view):
+        self.page.close(self.controls[0])
+        self.page.add(view)
         self.controls[0] = view
         self.page.update()
-    
-    # def lookit_contacts(self, contactList):
-    #     self.page.views.append(ContactListPage(self.page, contactList))
-    #     self.page.update()
+
 
     def load_account_cards(self):
         self.accountView.controls[-1] = ft.Row(
@@ -92,6 +91,23 @@ class AppLayout(ft.Row):
         )
         
     def make_contact_list_view(self, account):
+        def make_contact_list_tiles():
+            listTiles = []
+            for c in self.app.get_contact_list(account):
+                listTiles.append(
+                    ft.ListTile(
+                        title = ft.Text(c.full_name),
+                        trailing = ft.IconButton(
+                            icon = ft.Icons.SEARCH,
+                            icon_color = "blue200",
+                            tooltip = "View Contact",
+                            on_click = lambda _, contact=c: self.view_contact(contact)
+                        ),
+                        on_click = lambda _, contact=c: self.view_contact(contact)
+                    )
+                )
+            return listTiles
+                            
         contactListView = ft.Column (
             [
                 ft.Row(
@@ -113,27 +129,20 @@ class AppLayout(ft.Row):
                     ]
                 ),
                 ft.Container(
+                    height = 500,
                     content = ft.ListView(
-                        controls = [
-                            ft.ListTile(
-                                title = ft.Text(c.full_name),
-                                hover_color = "indigo500",
-                                trailing = ft.IconButton(
-                                    icon = ft.Icons.SEARCH,
-                                    icon_color = "blue200",
-                                    tooltip = "View Contact",
-                                    on_click = lambda _, contact=c: self.view_contact(contact)
-                                ),
-                                on_click = lambda _, contact=c: self.view_contact(contact)
-                            )
-                            for c in self.app.get_contact_list(account)
-                        ],
+                        make_contact_list_tiles(),
                         spacing = 2,
-                        divider_thickness = 2
+                        divider_thickness = 2,
+                        expand=True
                     ),
+                    expand=True
                 )
             ]
         )
+
+        self.page.add(contactListView)
+
         return contactListView
     
     def view_contact(self, contact):
