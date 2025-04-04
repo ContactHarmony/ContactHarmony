@@ -159,14 +159,18 @@ class AppLayout(ft.Row):
                     body.append(ContactText(f"{phone.number} ({phone.type})"))
                 else:
                     body.append(ContactText(f"{phone.number}"))
-            body.append(ContactLabel("Date of Birth")),
-            body.append(ContactText(contact.birthday)),
-            body.append(ContactLabel("Organization")),
-            body.append(ContactText(contact.organization[0]))
-            body.append(ContactLabel("Title"))
-            body.append(ContactText(contact.title))
-            body.append(ContactLabel("Notes"))
-            body.append(ContactText(contact.note))
+            if contact.birthday != "":
+                body.append(ContactLabel("Date of Birth"))
+                body.append(ContactText(contact.birthday))
+            if contact.organization[0] != "":
+                body.append(ContactLabel("Organization"))
+                body.append(ContactText(contact.organization[0]))
+            if contact.title != "":
+                body.append(ContactLabel("Title"))
+                body.append(ContactText(contact.title))
+            if contact.note != "":
+                body.append(ContactLabel("Notes"))
+                body.append(ContactText(contact.note))
             return body
 
         class ContactLabel(ft.Container):
