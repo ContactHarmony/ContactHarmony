@@ -162,7 +162,7 @@ class AppLayout(ft.Row):
             body.append(ContactLabel("Date of Birth")),
             body.append(ContactText(contact.birthday)),
             body.append(ContactLabel("Organization")),
-            body.append(ContactText(contact.organization))
+            body.append(ContactText(contact.organization[0]))
             body.append(ContactLabel("Title"))
             body.append(ContactText(contact.title))
             body.append(ContactLabel("Notes"))
