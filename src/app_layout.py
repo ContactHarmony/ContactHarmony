@@ -38,11 +38,8 @@ class AppLayout(ft.Row):
 
 
     def look_at(self, view):
-        self.page.close(self.controls[0])
-        self.page.add(view)
         self.controls[0] = view
         self.page.update()
-
 
     def load_account_cards(self):
         self.accountView.controls[-1] = ft.Row(
@@ -140,7 +137,7 @@ class AppLayout(ft.Row):
                 )
             ]
         )
-
+        
         self.page.add(contactListView)
 
         return contactListView
