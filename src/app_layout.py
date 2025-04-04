@@ -35,6 +35,7 @@ class AppLayout(ft.Row):
         self.contactListView: ft.Control = ft.Column()
 
         self.controls = [self.accountView]
+        self.page.add(self.contactListView)
 
 
     def look_at(self, view):
@@ -105,8 +106,7 @@ class AppLayout(ft.Row):
                 )
             return listTiles
                             
-        contactListView = ft.Column (
-            [
+        self.contactListView.controls = [
                 ft.Row(
                     [
                         ft.Container(
@@ -136,11 +136,8 @@ class AppLayout(ft.Row):
                     expand=True
                 )
             ]
-        )
         
-        self.page.add(contactListView)
-
-        return contactListView
+        return self.contactListView
     
     def view_contact(self, contact):
         def close_dlg(e):
