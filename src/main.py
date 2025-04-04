@@ -121,6 +121,13 @@ class ContactHarmonyApp(AppLayout):
             ]
         )
         self.page.open(dialog)
+
+    def get_contact_list(self, account):
+        try:
+            contactList = self.contactManager.get_account_contacts(account)
+        except:
+            return None
+        return contactList
         
     
 
