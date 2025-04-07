@@ -45,8 +45,8 @@ FN:Johnny Test
 N:Test;Johnny;;;
 BDAY;VALUE=date:2002-12-05
 NOTE:Note!
-EMAIL;TYPE=INTERNET:justtesting@yahoo.com
 EMAIL;TYPE=INTERNET:johnny_test@student.uml.edu
+EMAIL;TYPE=INTERNET:justtesting@yahoo.com
 TEL:+19013004101
 REV:2025-04-02T20:52:45Z
 UID:contactharmony:2
