@@ -32,10 +32,9 @@ class AppLayout(ft.Row):
             ]
         )
 
-        self.contactListView: ft.Control = ft.Column()
+        self.contactListView: ft.Control = ft.Column(expand = True)
 
         self.controls = [self.accountView]
-        self.page.add(self.contactListView)
 
 
     def look_at(self, view):
@@ -91,19 +90,20 @@ class AppLayout(ft.Row):
     def make_contact_list_view(self, account):
         def make_contact_list_tiles():
             listTiles = []
-            for c in self.app.get_contact_list(account):
-                listTiles.append(
-                    ft.ListTile(
-                        title = ft.Text(c.full_name),
-                        trailing = ft.IconButton(
-                            icon = ft.Icons.SEARCH,
-                            icon_color = "blue200",
-                            tooltip = "View Contact",
+            for z in range(20):
+                for c in self.app.get_contact_list(account):
+                    listTiles.append(
+                        ft.ListTile(
+                            title = ft.Text(c.full_name),
+                            trailing = ft.IconButton(
+                                icon = ft.Icons.SEARCH,
+                                icon_color = "blue200",
+                                tooltip = "View Contact",
+                                on_click = lambda _, contact=c: self.view_contact(contact)
+                            ),
                             on_click = lambda _, contact=c: self.view_contact(contact)
-                        ),
-                        on_click = lambda _, contact=c: self.view_contact(contact)
+                        )
                     )
-                )
             return listTiles
                             
         self.contactListView.controls = [
@@ -126,12 +126,10 @@ class AppLayout(ft.Row):
                     ]
                 ),
                 ft.Container(
-                    height = 500,
                     content = ft.ListView(
                         make_contact_list_tiles(),
                         spacing = 2,
                         divider_thickness = 2,
-                        expand=True
                     ),
                     expand=True
                 )
