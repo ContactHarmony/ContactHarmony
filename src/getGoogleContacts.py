@@ -100,7 +100,7 @@ def fetch_contact(href, combined_file, gmail, applicationPassword):
 # Goes through contacts to make sure there are no disconnected lines
 def fix_contacts_if_long(prepreocessed_lines):
     combined_lines = ""
-    previous_line = ""#prepreocessed_lines.partition("\r\n")[0]
+    previous_line = ""
     for line in prepreocessed_lines.split("\r\n"):
         line = line.strip()
         if ":" not in line and len(previous_line) == 75:
