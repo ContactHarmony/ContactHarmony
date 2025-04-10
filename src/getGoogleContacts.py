@@ -87,7 +87,8 @@ def fetch_contact(href, combined_file, gmail, applicationPassword):
     response = requests.get(url, auth=(gmail, applicationPassword))
 
     if response.status_code == 200:
-        vcard_content = response.content.decode("utf-8")
+        un_fixed_content = response.content.decode("utf-8")
+        vcard_content = fix_contacts_if_long(un_fixed_content)
         filename = href.split("/")[-1]
         save_contact(filename, vcard_content, combined_file)
         return True
@@ -96,6 +97,21 @@ def fetch_contact(href, combined_file, gmail, applicationPassword):
         print(response.content.decode("utf-8"))
         return False
 
+# Goes through contacts to make sure there are no disconnected lines
+def fix_contacts_if_long(prepreocessed_lines):
+    combined_lines = ""
+    previous_line = ""#prepreocessed_lines.partition("\r\n")[0]
+    for line in prepreocessed_lines.split("\r\n"):
+        line = line.strip()
+        if ":" not in line and len(previous_line) == 75:
+            previous_line = previous_line + line
+            combined_lines = combined_lines + previous_line
+            previous_line = ""
+        else:
+            combined_lines = combined_lines + previous_line + "\n"
+            previous_line = line
+        
+    return combined_lines
 
 def get_google_contacts(gmail, applicationPassword, directory, fname):
     # make sure output directory exists and create file
