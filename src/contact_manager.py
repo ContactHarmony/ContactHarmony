@@ -36,7 +36,7 @@ class ContactManager():
         else:
             if os.path.exists(newPath):
                 os.remove(newPath)   #TODO if used on existing account, return to previous version
-            raise Exception(f"Failed to fetch contacts from {account.address}")
+        return status
         
     def get_supported_services(self):
         '''return a list of supported services'''
@@ -45,7 +45,7 @@ class ContactManager():
     def get_connected_accounts(self):
         '''returns a list of connected accounts'''
         return list(self.connectedAccounts.keys())
-    
+
     def get_account_contacts(self, account: Account):
         '''returns a list of account contacts'''
         parser = VCF_parser()
