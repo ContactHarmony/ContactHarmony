@@ -204,29 +204,27 @@ class ContactsView(ft.View):
         else:
             def make_contact_list_tiles():
                 listTiles = []
-                for z in range(20):
-                    for c in self.contactManager.get_account_contacts(self.account):
-                        listTiles.append(
-                            ft.ListTile(
-                                title = ft.Text(c.full_name),
-                                trailing = ft.IconButton(
-                                    icon = ft.Icons.SEARCH,
-                                    icon_color = "blue200",
-                                    tooltip = "View Contact",
-                                    on_click = lambda _, contact=c: self.view_contact(contact)
-                                ),
+                for c in self.contactManager.get_account_contacts(self.account):
+                    listTiles.append(
+                        ft.ListTile(
+                            title = ft.Text(c.full_name),
+                            trailing = ft.IconButton(
+                                icon = ft.Icons.SEARCH,
+                                icon_color = "blue200",
+                                tooltip = "View Contact",
                                 on_click = lambda _, contact=c: self.view_contact(contact)
-                            )
+                            ),
+                            on_click = lambda _, contact=c: self.view_contact(contact)
                         )
+                    )
                 return listTiles
                                 
-            self.controls[-1] = [
-                ft.ListView(
+            self.controls[-1] = ft.ListView(
                     make_contact_list_tiles(),
                     spacing = 2,
                     divider_thickness = 2,
+                    expand = True ,
                 )
-            ]
         self.page.update()
 
     def view_contact(self, contact):
@@ -252,7 +250,7 @@ class ContactsView(ft.View):
             if contact.birthday != "":
                 body.append(ContactLabel("Date of Birth"))
                 body.append(ContactText(contact.birthday))
-            if contact.organization[0] != "":
+            if contact.organization != "":
                 body.append(ContactLabel("Organization"))
                 body.append(ContactText(contact.organization[0]))
             if contact.title != "":
