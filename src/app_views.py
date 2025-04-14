@@ -148,13 +148,13 @@ class HomeView(ft.View):
                                                 icon = ft.Icons.PERSON_SEARCH,
                                                 icon_color = "blue200",
                                                 tooltip = "Browse Contacts",
-                                                on_click = lambda _ : self.open_account_contact_page(a)
+                                                on_click = lambda _, account=a : self.open_account_contact_page(account)
                                             ),
                                             ft.IconButton(
                                                 icon = ft.Icons.DELETE_FOREVER,
                                                 icon_color = "pink500",
                                                 tooltip = "Detach Account",
-                                                on_click = lambda _ : self.remove_account_dlg(a)
+                                                on_click = lambda _, account=a : self.remove_account_dlg(account)
                                             ),
                                         ],
                                         spacing = 10,

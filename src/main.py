@@ -12,8 +12,10 @@ if __name__ == "__main__":
         page.update()
         contactManager = ContactManager()
 
-        testAccount = Account("google", "contactharmony.test@gmail.com", "iham kmcq kjjb flxk")
-        contactManager.connect_account(testAccount)
+        testGoogleAccount = Account("google", "contactharmony.test@gmail.com", "iham kmcq kjjb flxk")
+        testYahooAccount = Account("yahoo", "contactharmony@yahoo.com", "fxhakkkkcriljlhj")
+        contactManager.connect_account(testGoogleAccount)
+        contactManager.connect_account(testYahooAccount)
 
         def route_change(e):
             troute = ft.TemplateRoute(page.route)
