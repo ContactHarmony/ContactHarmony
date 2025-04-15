@@ -1,3 +1,8 @@
+import json
+import base64
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import os
 from helpers import Account
 import getGoogleContacts as google
@@ -67,4 +72,78 @@ class ContactManager():
             os.remove(self.connectedAccounts[account])
             del self.connectedAccounts[account]
         
+    def generate_key(self, password: str, salt: bytes) -> bytes:
+        '''Generate encryption key from password and salt'''
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=480000,
+        )
+        return base64.urlsafe_b64encode(kdf.derive(password.encode()))
     
+    def save_credentials(self, master_password: str) -> bool:
+        ''' Save credentials to a file, returns true if successful'''
+        if not self.connectedAccounts:
+            return False
+        
+        # Prepare data to encrypt
+        creds_data = {}
+        for account in self.connectedAccounts:
+            creds_data[account.adress] = {
+                "service": account.service,
+                "password": account.applicationPassword
+            }
+
+        # Generate salt and key
+        salt = os.urandom(16)
+        key = self.generate_key(master_password, salt)
+        cipher_suite = Fernet(key)
+
+        # Encrypt data
+        encrypted_data = cipher_suite.encrypt(json.dumps(creds_data).encode())
+
+        # Store salt and data
+        to_store = {
+            "salt": base64.urlsafe_b64encode(salt).decode(),
+            "data": base64.urlsafe_b64encode(encrypted_data).decode()
+        }
+
+        try:
+            with open(self.credentials_file, "w") as f:
+                json.dump(to_store, f)
+            return True
+        except Exception as e:
+            print(f"Error saving credentials: {e}")
+            return False
+        
+    def load_credentials(self, master_password: str) -> Dict[str, Account]:
+        ''' Load and decrypt credenttials, returns a dictionary of accounts'''
+        
+        if not os.path.exists(self.credentials_file):
+            return {}
+        try:
+            with open(self.credentials_file, "r") as f:
+                stored_data = json.load(f)
+
+            salt = base64.urlsafe_b64decode(stored_data["salt"].encode())
+            encrypted_data = base64.urlsafe_b64decode(stored_data["data"].encode())
+
+            # Generate key and decrypt data
+            key = self.generate_key(master_password, salt)
+            cipher_suite = Fernet(key)
+
+            decrypted_data = json.loads(cipher_suite.decrypt(encrypted_data).decode())
+
+            # Convert to Account objects
+            accounts = {}
+            for email, data in decrypted_data.items():
+                accounts[email] = Account(
+                    address=email,
+                    service=data["service"],
+                    applicationPassword=data["password"]
+                )
+            return accounts
+        except Exception as e:
+            print(f"Error loading credentials: {e}")
+            return {}
