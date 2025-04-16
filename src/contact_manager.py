@@ -13,6 +13,7 @@ class ContactManager():
     def __init__(self, backup_dir = "./backups"):
         self.defaultBackupDir = backup_dir
         self.connectedAccounts = {}
+        self.credentials_file = "./credentials"
     
     def connect_account(self, account: Account):
         '''attempt to connect an account to the ContactManager.'''
@@ -38,6 +39,7 @@ class ContactManager():
 
         if status == True:
             self.connectedAccounts[account] = newPath
+            self.save_credentials("ReplaceThisStringWithPassword")
         else:
             if os.path.exists(newPath):
                 os.remove(newPath)   #TODO if used on existing account, return to previous version
@@ -90,7 +92,7 @@ class ContactManager():
         # Prepare data to encrypt
         creds_data = {}
         for account in self.connectedAccounts:
-            creds_data[account.adress] = {
+            creds_data[account.address] = {
                 "service": account.service,
                 "password": account.applicationPassword
             }
@@ -117,8 +119,8 @@ class ContactManager():
             print(f"Error saving credentials: {e}")
             return False
         
-    def load_credentials(self, master_password: str) -> Dict[str, Account]:
-        ''' Load and decrypt credenttials, returns a dictionary of accounts'''
+    def load_credentials(self, master_password: str) -> dict[str, Account]:
+        ''' Load and decrypt credentials, returns a dictionary of accounts'''
         
         if not os.path.exists(self.credentials_file):
             return {}
