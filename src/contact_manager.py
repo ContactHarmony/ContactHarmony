@@ -73,6 +73,7 @@ class ContactManager():
         if account in self.connectedAccounts:
             os.remove(self.connectedAccounts[account])
             del self.connectedAccounts[account]
+            self.save_credentials("ReplaceThisStringWithPassword")
         
     def generate_key(self, password: str, salt: bytes) -> bytes:
         '''Generate encryption key from password and salt'''
@@ -87,6 +88,7 @@ class ContactManager():
     def save_credentials(self, master_password: str) -> bool:
         ''' Save credentials to a file, returns true if successful'''
         if not self.connectedAccounts:
+            os.remove(self.credentials_file)
             return False
         
         # Prepare data to encrypt
