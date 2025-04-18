@@ -13,7 +13,8 @@ class ContactManager():
     def __init__(self, backup_dir = "./backups"):
         self.defaultBackupDir = backup_dir
         self.connectedAccounts = {}
-        self.credentials_file = "./credentials"
+        self.credentials_file = "./credentials.json"
+        self._masterPass = "d04kcirid98cn@#"
     
     def connect_account(self, account: Account):
         '''attempt to connect an account to the ContactManager.'''
@@ -39,7 +40,7 @@ class ContactManager():
 
         if status == True:
             self.connectedAccounts[account] = newPath
-            self.save_credentials("ReplaceThisStringWithPassword")
+            self.save_credentials()
         else:
             if os.path.exists(newPath):
                 os.remove(newPath)   #TODO if used on existing account, return to previous version
@@ -73,7 +74,7 @@ class ContactManager():
         if account in self.connectedAccounts:
             os.remove(self.connectedAccounts[account])
             del self.connectedAccounts[account]
-            self.save_credentials("ReplaceThisStringWithPassword")
+            self.save_credentials()
         
     def generate_key(self, password: str, salt: bytes) -> bytes:
         '''Generate encryption key from password and salt'''
@@ -85,7 +86,7 @@ class ContactManager():
         )
         return base64.urlsafe_b64encode(kdf.derive(password.encode()))
     
-    def save_credentials(self, master_password: str) -> bool:
+    def save_credentials(self) -> bool:
         ''' Save credentials to a file, returns true if successful'''
         if not self.connectedAccounts:
             os.remove(self.credentials_file)
@@ -101,7 +102,7 @@ class ContactManager():
 
         # Generate salt and key
         salt = os.urandom(16)
-        key = self.generate_key(master_password, salt)
+        key = self.generate_key(self._masterPass, salt)
         cipher_suite = Fernet(key)
 
         # Encrypt data
@@ -121,7 +122,7 @@ class ContactManager():
             print(f"Error saving credentials: {e}")
             return False
         
-    def load_credentials(self, master_password: str) -> dict[str, Account]:
+    def load_credentials(self) -> dict[str, Account]:
         ''' Load and decrypt credentials, returns a dictionary of accounts'''
         
         if not os.path.exists(self.credentials_file):
@@ -134,7 +135,7 @@ class ContactManager():
             encrypted_data = base64.urlsafe_b64decode(stored_data["data"].encode())
 
             # Generate key and decrypt data
-            key = self.generate_key(master_password, salt)
+            key = self.generate_key(self._masterPass, salt)
             cipher_suite = Fernet(key)
 
             decrypted_data = json.loads(cipher_suite.decrypt(encrypted_data).decode())
