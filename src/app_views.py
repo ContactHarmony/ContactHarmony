@@ -227,13 +227,23 @@ class ContactsView(ft.View):
                 )
         self.page.update()
     
-    def add_account(self, account : Account, contact):
-        print(contact.full_name)
-    
+  
 
     def view_contact(self, contact):
         def close_dlg(e):
-            self.page.close(dialog)
+            if dropdown_account.value is None:
+                dropdown_account.error_text = "Please select an account"
+                self.page.update()
+            else:
+                account_array = dropdown_account.value.split(',')
+                selected_account = Account(account_array[0], account_array[1], account_array[2])
+                if selected_account.address == self.account.address:
+                    dropdown_account.error_text = "Please select a different account"
+                    self.page.update()
+                else:
+                    print(selected_account.address)
+                    self.page.close(dialog)
+
 
         def make_contact_body():
             body = [] 
@@ -280,13 +290,16 @@ class ContactsView(ft.View):
                 self.value = text
                 self.theme_style = ft.TextThemeStyle.BODY_LARGE
 
+        # Gets all account options.
         def get_account_dropdown():
             options = []
             for account in self.contactManager.get_connected_accounts():
                 options.append(
                     ft.DropdownOption(
-                        key=account,
-                        text=account.address,
+                        # key turns everything into string values, so cannot use the Account object.
+                        # We must turn it into a string instead that can be turned into a list.
+                        key = account.service + ',' + account.address + ',' + account.applicationPassword,
+                        text = account.address,
                     )
                 )
             return options
@@ -314,19 +327,15 @@ class ContactsView(ft.View):
                     ft.Row(
                         [
                             dropdown_account,
-                            ft.TextButton(
-                                "Add to Other Account",
-                                icon = ft.Icons.ARROW_RIGHT_ROUNDED,
-                                icon_color = "blue200",
-                                tooltip = "Add to Other Account",
-                                on_click = lambda _, account=dropdown_account.value, contact=contact : self.add_account(account, contact) #TODO FIX THIS
-                            ),
                         ],
                         spacing = 10
                     ), 
                 ],
                 spacing = 0
-            )
+            ),
+            actions=[
+                ft.ElevatedButton(text="Add to other Account", on_click=close_dlg)
+            ]
         )
         self.page.open(dialog)
 
