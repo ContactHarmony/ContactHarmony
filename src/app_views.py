@@ -226,6 +226,7 @@ class ContactsView(ft.View):
                     expand = True ,
                 )
         self.page.update()
+    
 
     def view_contact(self, contact):
         def close_dlg(e):
@@ -275,6 +276,17 @@ class ContactsView(ft.View):
                 super().__init__(*args, **kwargs)
                 self.value = text
                 self.theme_style = ft.TextThemeStyle.BODY_LARGE
+
+        def get_account_dropdown():
+            options = []
+            for account in self.contactManager.get_connected_accounts():
+                options.append(
+                    ft.DropdownOption(
+                        key=account,
+                        text=account.address,
+                    )
+                )
+            return options
         
         dialog = ft.AlertDialog(
             title = ft.Container(
@@ -285,7 +297,30 @@ class ContactsView(ft.View):
                 alignment = ft.alignment.center
             ),
             content = ft.Column(
-                make_contact_body(),
+                [
+                    ft.Column(
+                        make_contact_body(),
+                        spacing = 0
+                    ),
+                    ft.Row(
+                        [
+                            ft.Dropdown(
+                                editable=False,
+                                label="Accounts",
+                                options=get_account_dropdown()
+                            ),
+                            ft.TextButton(
+                                "Add to Other Account",
+                                icon = ft.Icons.ARROW_RIGHT_ROUNDED,
+                                icon_color = "blue200",
+                                tooltip = "Add to Other Account"
+                            ),
+                        ],
+                        spacing = 10
+                    ),
+                    
+                ],
+                
                 spacing = 0
             )
         )
