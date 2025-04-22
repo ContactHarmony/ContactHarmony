@@ -77,3 +77,33 @@ class VCF_parser:
 
         # Add the contact to the list
         self.contacts.append(self.current_contact)
+    
+    # Given a contact object, convert back to a vcf string
+    def contact_to_vcf(self, in_contact : Contact):
+        vcard_text = vobject.vCard()
+        vcard_text.add('n')
+        vcard_text.n.value = vobject.vcard.Name( family = in_contact.last_name, given = in_contact.first_name )
+        vcard_text.add('fn')
+        vcard_text.fn.value = in_contact.first_name + in_contact.last_name
+
+        vcard_text.add('tel')
+        for phone in in_contact.phones:
+            vcard_text.tel.value = phone.number
+            vcard_text.tel.type_param = phone.type
+        
+        vcard_text.add('email')
+        for phone in in_contact.phones:
+            vcard_text.email.value = phone.number
+            vcard_text.email.type_param = phone.type
+        
+        vcard_text.add('org')
+        vcard_text.org.value = in_contact.organization
+        vcard_text.add('title')
+        vcard_text.title.value = in_contact.title
+        vcard_text.add('note')
+        vcard_text.note.value = in_contact.note
+        vcard_text.add('bday')
+        vcard_text.bday.value = in_contact.birthday
+
+        return vcard_text
+
