@@ -227,6 +227,9 @@ class ContactsView(ft.View):
                 )
         self.page.update()
     
+    def add_account(self, account : Account, contact):
+        print(contact.full_name)
+    
 
     def view_contact(self, contact):
         def close_dlg(e):
@@ -288,6 +291,12 @@ class ContactsView(ft.View):
                 )
             return options
         
+        dropdown_account = ft.Dropdown(
+            editable=False,
+            label="Accounts",
+            options=get_account_dropdown()
+        )
+        
         dialog = ft.AlertDialog(
             title = ft.Container(
                 ft.CircleAvatar(
@@ -304,23 +313,18 @@ class ContactsView(ft.View):
                     ),
                     ft.Row(
                         [
-                            ft.Dropdown(
-                                editable=False,
-                                label="Accounts",
-                                options=get_account_dropdown()
-                            ),
+                            dropdown_account,
                             ft.TextButton(
                                 "Add to Other Account",
                                 icon = ft.Icons.ARROW_RIGHT_ROUNDED,
                                 icon_color = "blue200",
-                                tooltip = "Add to Other Account"
+                                tooltip = "Add to Other Account",
+                                on_click = lambda _, account=dropdown_account.value, contact=contact : self.add_account(account, contact) #TODO FIX THIS
                             ),
                         ],
                         spacing = 10
-                    ),
-                    
+                    ), 
                 ],
-                
                 spacing = 0
             )
         )
