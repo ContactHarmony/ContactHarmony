@@ -241,7 +241,7 @@ class ContactsView(ft.View):
                     dropdown_account.error_text = "Please select a different account"
                     self.page.update()
                 else:
-                    print(selected_account.address)
+                    self.contactManager.add_contact_to_account(account=selected_account, contact=contact)
                     self.page.close(dialog)
 
 

@@ -106,4 +106,3 @@ class VCF_parser:
         vcard_text.bday.value = in_contact.birthday
 
         return vcard_text
-
