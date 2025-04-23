@@ -1,4 +1,5 @@
 import flet as ft
+import os
 from contact_manager import ContactManager
 from helpers import Account
 
@@ -21,6 +22,9 @@ class HomeView(ft.View):
             bgcolor=ft.Colors.LIGHT_BLUE_ACCENT_700,
         )
 
+        self.filePicker = ft.FilePicker(on_result=self.open_vcf)
+        self.page.overlay.append(self.filePicker)
+
         self.controls = [
             ft.Row(
                 [
@@ -37,6 +41,14 @@ class HomeView(ft.View):
                             "Connect Account",
                             icon=ft.Icons.ADD,
                             on_click=lambda _ : self.connect_account_dlg(),
+                        ),
+                        padding=ft.padding.only(top=15),
+                    ),
+                    ft.Container(
+                        ft.FilledTonalButton(
+                            "Open VCF",
+                            icon=ft.Icons.INSERT_DRIVE_FILE,
+                            on_click=lambda _ : self.filePicker.pick_files(allowed_extensions=["vcf"]),
                         ),
                         padding=ft.padding.only(right=50, top=15),
                     )
@@ -174,20 +186,25 @@ class HomeView(ft.View):
             )
             self.page.update()
 
+    def open_vcf(self, e):
+        if e.files is not None:
+            filePath = e.files[0].path
+            self.contactManager.fileLook = filePath
+            self.page.go("/file")
+        
 
 class ContactsView(ft.View):
-    def __init__(self, page: ft.Page, contactManager: ContactManager, account: Account, *args, **kwargs):
+    def __init__(self, page: ft.Page, contactManager: ContactManager, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.page = page
         self.contactManager = contactManager
-        self.account = account
 
         self.expand = True
         self.tight = True
         self.vertical_alignment = ft.CrossAxisAlignment.START
 
         self.appbar = ft.AppBar(
-            title=ft.Text(f"{account.address} Contacts", text_align="start", theme_style=ft.TextThemeStyle.HEADLINE_SMALL),
+            title=ft.Text(f"{self.get_title()} Contacts", text_align="start", theme_style=ft.TextThemeStyle.HEADLINE_SMALL),
             center_title=False,
             bgcolor=ft.Colors.LIGHT_BLUE_ACCENT_700
         )
@@ -198,13 +215,20 @@ class ContactsView(ft.View):
 
         self.load_contacts()
 
+    def fetch_contact_list(self):
+        return []
+    
+    def get_title(self):
+        return "Contacts"
+
     def load_contacts(self):
-        if len(self.contactManager.get_account_contacts(self.account)) == 0:
+        contacts = self.fetch_contact_list()
+        if len(contacts) == 0:
             self.controls[-1] = ft.Row([ft.Text("This account has no contacts!")])
         else:
             def make_contact_list_tiles():
                 listTiles = []
-                for c in self.contactManager.get_account_contacts(self.account):
+                for c in contacts:
                     listTiles.append(
                         ft.ListTile(
                             title = ft.Text(c.full_name),
@@ -291,3 +315,24 @@ class ContactsView(ft.View):
         )
         self.page.open(dialog)
 
+class AccountContactsView(ContactsView):
+    def __init__(self, page: ft.Page, contactManager: ContactManager, account: Account, *args, **kwargs):
+        self.account = account
+        super().__init__(page, contactManager, *args, **kwargs)
+
+    def get_title(self):
+        return self.account.address
+    
+    def fetch_contact_list(self):
+        return self.contactManager.get_account_contacts(self.account)
+    
+class FileContactsView(ContactsView):
+    def __init__(self, page: ft.Page, contactManager: ContactManager, filePath, *args, **kwargs):
+        self.filePath = filePath
+        super().__init__(page, contactManager, *args, **kwargs)
+
+    def get_title(self):
+        return os.path.basename(self.filePath)
+    
+    def fetch_contact_list(self):
+        return self.contactManager.get_file_contacts(self.filePath)
