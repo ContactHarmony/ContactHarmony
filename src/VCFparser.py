@@ -105,4 +105,6 @@ class VCF_parser:
         vcard_text.add('bday')
         vcard_text.bday.value = in_contact.birthday
 
+        vcard_text = vcard_text.serialize()
+
         return vcard_text
