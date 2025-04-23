@@ -73,4 +73,15 @@ class ContactManager():
             os.remove(self.connectedAccounts[account])
             del self.connectedAccounts[account]
         
-    
+    def add_contact_to_account(self, account: Account, contact: Contact):
+        parser = VCF_parser()
+        vcf_string = parser.contact_to_vcf(contact)
+        match account.service:
+            case "google":
+                google.post_contact_to_google_account(vcf_string, account.address, account.applicationPassword)
+                self.connect_account(account)
+            case "yahoo":
+                yahoo.post_contact_to_yahoo_account(vcf_string, account.address, account.applicationPassword)
+                self.connect_account(account)
+            case _:
+                raise Exception(f"{account.service} support not implemented!") #Should be impossible to reach at the moment

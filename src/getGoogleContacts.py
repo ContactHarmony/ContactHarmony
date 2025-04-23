@@ -134,6 +134,33 @@ def get_google_contacts(gmail, applicationPassword, directory, fname):
         fetch_contact(href, combined_file_path, gmail, applicationPassword)
     return True
 
+
+# Add a new contact to a Google account using POST, per RFC 5995.
+# This uses the /lists/default/ collection and lets the server assign the resource ID.
+def post_contact_to_google_account(vcard, gmail, application_password):
+    post_url = f"{BASE_URL}/{gmail}/lists/default/"
+
+    headers = {
+        "Content-Type": "text/vcard; charset=utf-8",
+    }
+
+    response = requests.post(
+        post_url,
+        auth=(gmail, application_password),
+        headers=headers,
+        data=vcard.encode("utf-8")
+    )
+
+    if response.status_code == 201:
+        new_contact_url = response.headers.get("Location")
+        print(f"Contact added successfully. URL: {new_contact_url}")
+        return new_contact_url
+    else:
+        print(f"Failed to add contact: {response.status_code}")
+        print(response.content.decode("utf-8"))
+        return None
+
+
 '''
 if __name__ == "__main__":
     combined_file_path = os.path.join(OUTPUT_DIR, "contacts_combined.vcf")

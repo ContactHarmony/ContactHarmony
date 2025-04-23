@@ -215,6 +215,57 @@ class ContactsView(ft.View):
 
         self.load_contacts()
 
+    def add_contact_dlg(self, contact):
+        def close_dlg(e):
+            if dropdown_account.value is None:
+                dropdown_account.error_text = "Please select an account"
+                self.page.update()
+            else:
+                account_array = dropdown_account.value.split(',')
+                selected_account = Account(account_array[0], account_array[1], account_array[2])
+                if hasattr(self, 'account') and selected_account.address == self.account.address:
+                    dropdown_account.error_text = "Please select a different account"
+                    self.page.update()
+                else:
+                    self.contactManager.add_contact_to_account(account=selected_account, contact=contact)
+                    self.page.close(dialog)
+                
+        # Gets all account options.
+        def get_account_dropdown():
+            options = []
+            for account in self.contactManager.get_connected_accounts():
+                options.append(
+                    ft.DropdownOption(
+                        # key turns everything into string values, so cannot use the Account object.
+                        # We must turn it into a string instead that can be turned into a list.
+                        key = account.service + ',' + account.address + ',' + account.applicationPassword,
+                        text = account.address,
+                    )
+                )
+            return options
+        
+        dropdown_account = ft.Dropdown(
+            editable=False,
+            label="Accounts",
+            options=get_account_dropdown()
+        )
+
+
+        dialog = ft.AlertDialog(
+            title=ft.Text("Please select an account to add this contact to"),
+            content=ft.Column(
+                [
+                    dropdown_account
+                ],
+                tight=True,
+            ),
+            actions=[
+                ft.ElevatedButton(text="Connect", on_click=close_dlg)
+            ]
+        )
+        self.page.open(dialog)
+
+
     def fetch_contact_list(self):
         return []
     
@@ -226,19 +277,24 @@ class ContactsView(ft.View):
         if len(contacts) == 0:
             self.controls[-1] = ft.Row([ft.Text("This account has no contacts!")])
         else:
+            # Gets all account options.
             def make_contact_list_tiles():
                 listTiles = []
                 for c in contacts:
                     listTiles.append(
                         ft.ListTile(
-                            title = ft.Text(c.full_name),
-                            trailing = ft.IconButton(
+                            leading = ft.IconButton(
                                 icon = ft.Icons.SEARCH,
                                 icon_color = "blue200",
                                 tooltip = "View Contact",
                                 on_click = lambda _, contact=c: self.view_contact(contact)
+                            ),  
+                            title = ft.Text(c.full_name),
+                            trailing = ft.TextButton(
+                                text="Add to other Account",
+                                on_click=lambda _, contact=c : self.add_contact_dlg(contact)
                             ),
-                            on_click = lambda _, contact=c: self.view_contact(contact)
+                            on_click = lambda _, contact=c: self.view_contact(contact),
                         )
                     )
                 return listTiles
@@ -250,6 +306,8 @@ class ContactsView(ft.View):
                     expand = True ,
                 )
         self.page.update()
+    
+  
 
     def view_contact(self, contact):
         def close_dlg(e):
@@ -310,8 +368,8 @@ class ContactsView(ft.View):
             ),
             content = ft.Column(
                 make_contact_body(),
-                spacing = 0
-            )
+                spacing = 10
+            ),
         )
         self.page.open(dialog)
 
