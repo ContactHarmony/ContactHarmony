@@ -1,5 +1,5 @@
 import flet as ft
-from app_views import HomeView, ContactsView
+from app_views import HomeView, AccountContactsView, FileContactsView
 from contact_manager import ContactManager
 from helpers import Account
 
@@ -30,7 +30,13 @@ if __name__ == "__main__":
                 if account is None:
                     page.go("/")
                 else:
-                    page.views.append(ContactsView(page, contactManager, account, route=f"/contacts/{troute.service}/{troute.address}"))
+                    page.views.append(AccountContactsView(page, contactManager, account, route=f"/contacts/{troute.service}/{troute.address}"))
+            elif troute.match("/file"):
+                filePath = contactManager.fileLook
+                if filePath == None or filePath == "":
+                    page.go("/")
+                else:
+                    page.views.append(FileContactsView(page, contactManager, filePath, route="/file"))
             page.update()
 
         def view_pop(e):

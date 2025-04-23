@@ -8,6 +8,7 @@ class ContactManager():
     def __init__(self, backup_dir = "./backups"):
         self.defaultBackupDir = backup_dir
         self.connectedAccounts = {}
+        self.fileLook = ""
     
     def connect_account(self, account: Account):
         '''attempt to connect an account to the ContactManager.'''
@@ -50,6 +51,11 @@ class ContactManager():
         '''returns a list of account contacts'''
         parser = VCF_parser()
         parsedContacts = parser.parse_file(self.connectedAccounts[account])
+        return parsedContacts
+    
+    def get_file_contacts(self, path):
+        parser = VCF_parser()
+        parsedContacts =  parser.parse_file(path)
         return parsedContacts
     
     def generate_file_name(self, account: Account):
