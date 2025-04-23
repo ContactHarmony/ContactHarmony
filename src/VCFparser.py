@@ -92,9 +92,9 @@ class VCF_parser:
             vcard_text.tel.type_param = phone.type
         
         vcard_text.add('email')
-        for phone in in_contact.phones:
-            vcard_text.email.value = phone.number
-            vcard_text.email.type_param = phone.type
+        for email in in_contact.emails:
+            vcard_text.email.value = email.email
+            vcard_text.email.type_param = email.type
         
         vcard_text.add('org')
         vcard_text.org.value = in_contact.organization
@@ -106,5 +106,6 @@ class VCF_parser:
         vcard_text.bday.value = in_contact.birthday
 
         vcard_text = vcard_text.serialize()
+        print(vcard_text)
 
         return vcard_text

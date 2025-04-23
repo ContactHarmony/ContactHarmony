@@ -72,9 +72,10 @@ class ContactManager():
         vcf_string = parser.contact_to_vcf(contact)
         match account.service:
             case "google":
-                print("hi")
                 google.post_contact_to_google_account(vcf_string, account.address, account.applicationPassword)
+                self.connect_account(account)
             case "yahoo":
                 yahoo.post_contact_to_yahoo_account(vcf_string, account.address, account.applicationPassword)
+                self.connect_account(account)
             case _:
                 raise Exception(f"{account.service} support not implemented!") #Should be impossible to reach at the moment
