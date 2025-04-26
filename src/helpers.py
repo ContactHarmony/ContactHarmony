@@ -1,4 +1,5 @@
 from VCFparser import Contact
+from rapidfuzz import fuzz
 
 class Account():
     def __init__(self, service, address, applicationPassword):
@@ -13,5 +14,21 @@ class Account():
     
 def searchContacts(searchTerm: str, contacts: list[Contact]):
     searchTerm = searchTerm.lower()
-    matches = [c for c in contacts if searchTerm in c.full_name.lower()]
+    MINRATIO = 75
+    
+    matchRatios = []
+    for c in contacts:
+        contactStr = c.full_name.lower()
+        # addressStr =
+        ratio = fuzz.partial_token_set_ratio(searchTerm, contactStr)
+        if ratio >= MINRATIO:
+            print(f"Contact: {c.full_name}, Ratio: {ratio}")
+            matchRatios.append((c, ratio))
+
+    matchRatios.sort(key=lambda m: m[1], reverse=True)
+    matches = [m[0] for m in matchRatios]
+
     return matches
+
+def sortContacts(contacts: list[Contact]):
+    return sorted(contacts, key=lambda c: c.full_name)

@@ -1,7 +1,7 @@
 import flet as ft
 import os
 from contact_manager import ContactManager
-from helpers import Account, searchContacts
+from helpers import Account, searchContacts, sortContacts
 
 class HomeView(ft.View):
     def __init__(self, page: ft.Page, contactManager: ContactManager, *args, **kwargs):
@@ -219,7 +219,9 @@ class ContactsView(ft.View):
                     on_click = close_search
                 )]          
                 self.load_contacts(searchTerm=self.searchBar.value)
-        def close_search(e):
+            else:
+                close_search()
+        def close_search(e = None):
             self.load_contacts()
             self.searchBar.value = ""
             self.searchBar.bar_trailing.pop()
@@ -302,6 +304,7 @@ class ContactsView(ft.View):
         noContactsText = "This account has no contacts!"
         if self.contacts == []:
             self.contacts = self.fetch_contact_list()
+            self.contacts = sortContacts(self.contacts)
         if searchTerm == None or searchTerm == "":
             loadedContacts = self.contacts
         else:
