@@ -1,7 +1,7 @@
 import flet as ft
 import os
 from contact_manager import ContactManager
-from helpers import Account
+from helpers import Account, searchContacts
 
 class HomeView(ft.View):
     def __init__(self, page: ft.Page, contactManager: ContactManager, *args, **kwargs):
@@ -11,7 +11,7 @@ class HomeView(ft.View):
 
         self.expand = True
         self.tight = True
-        self.vertical_alignment = ft.CrossAxisAlignment.START
+        self.vertical_alignment = ft.MainAxisAlignment.START
 
         self.appbar = ft.AppBar(
             leading=ft.Icon(ft.Icons.ACCOUNT_CIRCLE, size=48),
@@ -195,13 +195,14 @@ class HomeView(ft.View):
 
 class ContactsView(ft.View):
     def __init__(self, page: ft.Page, contactManager: ContactManager, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs,)
         self.page = page
         self.contactManager = contactManager
 
         self.expand = True
         self.tight = True
-        self.vertical_alignment = ft.CrossAxisAlignment.START
+        self.vertical_alignment = ft.MainAxisAlignment.START
+        self.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
         self.appbar = ft.AppBar(
             title=ft.Text(f"{self.get_title()} Contacts", text_align="start", theme_style=ft.TextThemeStyle.HEADLINE_SMALL),
@@ -209,9 +210,35 @@ class ContactsView(ft.View):
             bgcolor=ft.Colors.LIGHT_BLUE_ACCENT_700
         )
 
+        def on_search(e):
+            if self.searchBar.value != "":      
+                self.searchBar.bar_trailing = [ft.IconButton(
+                    icon = ft.Icons.CLOSE,
+                    # icon_color = "blue200",
+                    tooltip = "Close Search",
+                    on_click = close_search
+                )]          
+                self.load_contacts(searchTerm=self.searchBar.value)
+        def close_search(e):
+            self.load_contacts()
+            self.searchBar.value = ""
+            self.searchBar.bar_trailing.pop()
+            self.searchBar.blur()
+        self.searchBar = ft.SearchBar(
+            full_screen=True,
+            bar_hint_text="Search conacts...",
+            view_hint_text="Search by name, email, phone number...",
+            on_submit=on_search
+            # on_tap=lambda _: self.searchBar.open_view()
+        )
+        
+
         self.controls = [
+            self.searchBar,
             ft.Row([ft.Text("This account has no contacts")])
         ]
+
+        self.contacts = []
 
         self.load_contacts()
 
@@ -265,22 +292,29 @@ class ContactsView(ft.View):
         )
         self.page.open(dialog)
 
-
     def fetch_contact_list(self):
         return []
     
     def get_title(self):
         return "Contacts"
 
-    def load_contacts(self):
-        contacts = self.fetch_contact_list()
-        if len(contacts) == 0:
-            self.controls[-1] = ft.Row([ft.Text("This account has no contacts!")])
+    def load_contacts(self, searchTerm = None):
+        noContactsText = "This account has no contacts!"
+        if self.contacts == []:
+            self.contacts = self.fetch_contact_list()
+        if searchTerm == None or searchTerm == "":
+            loadedContacts = self.contacts
+        else:
+            loadedContacts = searchContacts(searchTerm, self.contacts)
+            noContactsText = "There are no contacts matching this search!"
+        
+        if len(loadedContacts) == 0:
+            self.controls[-1] = ft.Row([ft.Text(noContactsText)])
         else:
             # Gets all account options.
             def make_contact_list_tiles():
                 listTiles = []
-                for c in contacts:
+                for c in loadedContacts:
                     listTiles.append(
                         ft.ListTile(
                             leading = ft.IconButton(
