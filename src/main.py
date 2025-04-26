@@ -14,13 +14,15 @@ if __name__ == "__main__":
 
         testGoogleAccount = Account("google", "contactharmony.test@gmail.com", "iham kmcq kjjb flxk")
         testYahooAccount = Account("yahoo", "contactharmony@yahoo.com", "fxhakkkkcriljlhj")
-        contactManager.connect_account(testGoogleAccount)
-        contactManager.connect_account(testYahooAccount)
+        # contactManager.connect_account(testGoogleAccount)
+        # contactManager.connect_account(testYahooAccount)
+        contactManager.load_credentials()
 
         def route_change(e):
             troute = ft.TemplateRoute(page.route)
             page.views.clear()
             page.views.append(HomeView(page, contactManager, route="/"))
+            
             if troute.match("/contacts/:service/:address"):
                 account = None
                 for a in contactManager.get_connected_accounts():
