@@ -14,11 +14,9 @@ if __name__ == "__main__":
 
         testGoogleAccount = Account("google", "contactharmony.test@gmail.com", "iham kmcq kjjb flxk")
         testYahooAccount = Account("yahoo", "contactharmony@yahoo.com", "fxhakkkkcriljlhj")
-        contactManager.connect_account(testGoogleAccount)
-        contactManager.connect_account(testYahooAccount)
-        loadedAccounts = contactManager.load_credentials()
-        for i in loadedAccounts:
-            contactManager.connect_account(loadedAccounts[i])
+        # contactManager.connect_account(testGoogleAccount)
+        # contactManager.connect_account(testYahooAccount)
+        contactManager.load_credentials()
 
         def route_change(e):
             troute = ft.TemplateRoute(page.route)

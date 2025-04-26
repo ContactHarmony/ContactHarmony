@@ -20,7 +20,8 @@ class ContactManager():
         '''attempt to connect an account to the ContactManager.'''
 
         status = False
-        if account in self.connectedAccounts:
+        refresh = account in self.connectedAccounts
+        if refresh:
             backupDirectory = os.path.dirname(self.connectedAccounts[account])
             backupFileName = os.path.basename(self.connectedAccounts[account])
         else:
@@ -42,7 +43,7 @@ class ContactManager():
             self.connectedAccounts[account] = newPath
             self.save_credentials()
         else:
-            if os.path.exists(newPath):
+            if os.path.exists(newPath) and not refresh:
                 os.remove(newPath)   #TODO if used on existing account, return to previous version
         return status
         
@@ -97,7 +98,8 @@ class ContactManager():
         for account in self.connectedAccounts:
             creds_data[account.address] = {
                 "service": account.service,
-                "password": account.applicationPassword
+                "password": account.applicationPassword,
+                "path": self.connectedAccounts[account]
             }
 
         # Generate salt and key
@@ -141,14 +143,14 @@ class ContactManager():
             decrypted_data = json.loads(cipher_suite.decrypt(encrypted_data).decode())
 
             # Convert to Account objects
-            accounts = {}
             for email, data in decrypted_data.items():
-                accounts[email] = Account(
+                account = Account(
                     address=email,
                     service=data["service"],
                     applicationPassword=data["password"]
                 )
-            return accounts
+                self.connectedAccounts[account] = data["path"]
+            return self.connectedAccounts
         except Exception as e:
             print(f"Error loading credentials: {e}")
             return {}
