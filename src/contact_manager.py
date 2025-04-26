@@ -15,6 +15,7 @@ class ContactManager():
         self.connectedAccounts = {}
         self.credentials_file = "./credentials.json"
         self._masterPass = "d04kcirid98cn@#"
+        self.fileLook = ""
     
     def connect_account(self, account: Account):
         '''attempt to connect an account to the ContactManager.'''
@@ -59,6 +60,11 @@ class ContactManager():
         '''returns a list of account contacts'''
         parser = VCF_parser()
         parsedContacts = parser.parse_file(self.connectedAccounts[account])
+        return parsedContacts
+    
+    def get_file_contacts(self, path):
+        parser = VCF_parser()
+        parsedContacts =  parser.parse_file(path)
         return parsedContacts
     
     def generate_file_name(self, account: Account):
@@ -154,3 +160,16 @@ class ContactManager():
         except Exception as e:
             print(f"Error loading credentials: {e}")
             return {}
+    
+    def add_contact_to_account(self, account: Account, contact: Contact):
+        parser = VCF_parser()
+        vcf_string = parser.contact_to_vcf(contact)
+        match account.service:
+            case "google":
+                google.post_contact_to_google_account(vcf_string, account.address, account.applicationPassword)
+                self.connect_account(account)
+            case "yahoo":
+                yahoo.post_contact_to_yahoo_account(vcf_string, account.address, account.applicationPassword)
+                self.connect_account(account)
+            case _:
+                raise Exception(f"{account.service} support not implemented!") #Should be impossible to reach at the moment

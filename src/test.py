@@ -1,6 +1,5 @@
 import pytest
 import os
-import shutil
 import vobject
 import getGoogleContacts as google
 import getYahooContacts as yahoo

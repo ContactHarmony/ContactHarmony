@@ -14,5 +14,5 @@ To build the application, execute the following steps:
     - ```pip install -r requirements.txt```
 3. The application is now ready to be run using the following terminal command at the root folder: ```flet run```
 ### Unit Tests
-To run the unit tests for this application, type the following terminal command at the root folder:
-```pytest src/test.py```
+To run the unit tests for this application, first install the dependencies using the terminal commands in step 2 above.
+Then, type the following terminal command at the root folder: ```pytest src/test.py```

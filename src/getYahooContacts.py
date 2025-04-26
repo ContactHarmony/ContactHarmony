@@ -1,5 +1,6 @@
 import os
 import requests
+import uuid
 from xml.etree import ElementTree as ET
 
 # Replace xxxxxxxxx@yahoo.com by your actual Yahoo email address
@@ -128,6 +129,29 @@ def get_yahoo_contacts(email, application_password, directory, fname):
     save_contacts_to_file(hrefs, combined_file_path, email, application_password)
     return True
 
+# Add a new contact to a Yahoo CardDAV address book using POST (RFC 5995).
+def post_contact_to_yahoo_account(vcard, email, application_password):
+    uid = str(uuid.uuid4())
+    contact_url = f"{BASE_URL}/{email}/Contacts/{uid}.vcf"
+
+    headers = {
+        "Content-Type": "text/vcard; charset=utf-8"
+    }
+
+    response = requests.put(
+        contact_url,
+        auth=(email, application_password),
+        headers=headers,
+        data=vcard.encode("utf-8")
+    )
+
+    if response.status_code in [200, 201, 204]:
+        print(f"Contact created at {contact_url}")
+        return contact_url
+    else:
+        print(f"Failed to create contact: {response.status_code}")
+        print(response.content.decode("utf-8"))
+        return None
 
 
 """if __name__ == "__main__":
