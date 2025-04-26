@@ -34,7 +34,7 @@ class HomeView(ft.View):
                             theme_style=ft.TextThemeStyle.HEADLINE_MEDIUM,
                         ),
                         expand=True,
-                        padding=ft.padding.only(top=15),
+                        padding=ft.padding.only(left=50, top=15),
                     ),
                     ft.Container(
                         ft.FilledTonalButton(
@@ -140,49 +140,52 @@ class HomeView(ft.View):
         if len(self.contactManager.get_connected_accounts()) == 0:
             self.controls[-1] = ft.Row([ft.Text("No connected accounts")])
         else:
-            self.controls[-1] = ft.Row(
-                [
-                    ft.Card(
-                        content = ft.Container(
-                            content = ft.Column(
-                                [
-                                    ft.Text(
-                                        a.address,
-                                        theme_style=ft.TextThemeStyle.LABEL_LARGE
-                                    ),
-                                    ft.Text(
-                                        f"{a.service.title()} account"
-                                    ),
-                                    ft.Row(
-                                        [
-                                            ft.TextButton(
-                                                "Browse Contacts",
-                                                icon = ft.Icons.PERSON_SEARCH,
-                                                icon_color = "blue200",
-                                                tooltip = "Browse Contacts",
-                                                on_click = lambda _, account=a : self.open_account_contact_page(account)
-                                            ),
-                                            ft.IconButton(
-                                                icon = ft.Icons.DELETE_FOREVER,
-                                                icon_color = "pink500",
-                                                tooltip = "Detach Account",
-                                                on_click = lambda _, account=a : self.remove_account_dlg(account)
-                                            ),
-                                        ],
-                                        spacing = 10,
-                                        alignment = ft.MainAxisAlignment.END
-                                    )
-                                ],
-                                spacing = 5
+            self.controls[-1] = ft.Container(
+                content=ft.Row(
+                    [
+                        ft.Card(
+                            content = ft.Container(
+                                content = ft.Column(
+                                    [
+                                        ft.Text(
+                                            a.address,
+                                            theme_style=ft.TextThemeStyle.LABEL_LARGE
+                                        ),
+                                        ft.Text(
+                                            f"{a.service.title()} account"
+                                        ),
+                                        ft.Row(
+                                            [
+                                                ft.TextButton(
+                                                    "Browse Contacts",
+                                                    icon = ft.Icons.PERSON_SEARCH,
+                                                    icon_color = "blue200",
+                                                    tooltip = "Browse Contacts",
+                                                    on_click = lambda _, account=a : self.open_account_contact_page(account)
+                                                ),
+                                                ft.IconButton(
+                                                    icon = ft.Icons.DELETE_FOREVER,
+                                                    icon_color = "pink500",
+                                                    tooltip = "Detach Account",
+                                                    on_click = lambda _, account=a : self.remove_account_dlg(account)
+                                                ),
+                                            ],
+                                            spacing = 10,
+                                            alignment = ft.MainAxisAlignment.END
+                                        )
+                                    ],
+                                    spacing = 5
+                                ),
+                                padding = 10
                             ),
-                            padding = 10
-                        ),
-                        margin = 10,
-                        width = 300
-                    )
-                    for a in self.contactManager.get_connected_accounts()
-                ],
-                wrap=True,
+                            margin = 10,
+                            width = 300
+                        )
+                        for a in self.contactManager.get_connected_accounts()
+                    ],
+                    wrap=True,
+                ),
+                padding=30
             )
             self.page.update()
 

@@ -1,3 +1,8 @@
+import json
+import base64
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import os
 from helpers import Account
 import getGoogleContacts as google
@@ -8,13 +13,16 @@ class ContactManager():
     def __init__(self, backup_dir = "./backups"):
         self.defaultBackupDir = backup_dir
         self.connectedAccounts = {}
+        self.credentials_file = "./credentials.json"
+        self._masterPass = "d04kcirid98cn@#"
         self.fileLook = ""
     
     def connect_account(self, account: Account):
         '''attempt to connect an account to the ContactManager.'''
 
         status = False
-        if account in self.connectedAccounts:
+        refresh = account in self.connectedAccounts
+        if refresh:
             backupDirectory = os.path.dirname(self.connectedAccounts[account])
             backupFileName = os.path.basename(self.connectedAccounts[account])
         else:
@@ -34,8 +42,9 @@ class ContactManager():
 
         if status == True:
             self.connectedAccounts[account] = newPath
+            self.save_credentials()
         else:
-            if os.path.exists(newPath):
+            if os.path.exists(newPath) and not refresh:
                 os.remove(newPath)   #TODO if used on existing account, return to previous version
         return status
         
@@ -72,7 +81,86 @@ class ContactManager():
         if account in self.connectedAccounts:
             os.remove(self.connectedAccounts[account])
             del self.connectedAccounts[account]
+            self.save_credentials()
         
+    def generate_key(self, password: str, salt: bytes) -> bytes:
+        '''Generate encryption key from password and salt'''
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=480000,
+        )
+        return base64.urlsafe_b64encode(kdf.derive(password.encode()))
+    
+    def save_credentials(self) -> bool:
+        ''' Save credentials to a file, returns true if successful'''
+        if not self.connectedAccounts:
+            os.remove(self.credentials_file)
+            return False
+        
+        # Prepare data to encrypt
+        creds_data = {}
+        for account in self.connectedAccounts:
+            creds_data[account.address] = {
+                "service": account.service,
+                "password": account.applicationPassword,
+                "path": self.connectedAccounts[account]
+            }
+
+        # Generate salt and key
+        salt = os.urandom(16)
+        key = self.generate_key(self._masterPass, salt)
+        cipher_suite = Fernet(key)
+
+        # Encrypt data
+        encrypted_data = cipher_suite.encrypt(json.dumps(creds_data).encode())
+
+        # Store salt and data
+        to_store = {
+            "salt": base64.urlsafe_b64encode(salt).decode(),
+            "data": base64.urlsafe_b64encode(encrypted_data).decode()
+        }
+
+        try:
+            with open(self.credentials_file, "w") as f:
+                json.dump(to_store, f)
+            return True
+        except Exception as e:
+            print(f"Error saving credentials: {e}")
+            return False
+        
+    def load_credentials(self) -> dict[str, Account]:
+        ''' Load and decrypt credentials, returns a dictionary of accounts'''
+        
+        if not os.path.exists(self.credentials_file):
+            return {}
+        try:
+            with open(self.credentials_file, "r") as f:
+                stored_data = json.load(f)
+
+            salt = base64.urlsafe_b64decode(stored_data["salt"].encode())
+            encrypted_data = base64.urlsafe_b64decode(stored_data["data"].encode())
+
+            # Generate key and decrypt data
+            key = self.generate_key(self._masterPass, salt)
+            cipher_suite = Fernet(key)
+
+            decrypted_data = json.loads(cipher_suite.decrypt(encrypted_data).decode())
+
+            # Convert to Account objects
+            for email, data in decrypted_data.items():
+                account = Account(
+                    address=email,
+                    service=data["service"],
+                    applicationPassword=data["password"]
+                )
+                self.connectedAccounts[account] = data["path"]
+            return self.connectedAccounts
+        except Exception as e:
+            print(f"Error loading credentials: {e}")
+            return {}
+    
     def add_contact_to_account(self, account: Account, contact: Contact):
         parser = VCF_parser()
         vcf_string = parser.contact_to_vcf(contact)
