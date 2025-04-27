@@ -1,5 +1,5 @@
 import flet as ft
-from app_views import HomeView, AccountContactsView, FileContactsView
+from app_views import HomeView, AccountContactsView, FileContactsView, AllContactsView
 from contact_manager import ContactManager
 from helpers import Account
 
@@ -23,7 +23,9 @@ if __name__ == "__main__":
             page.views.clear()
             page.views.append(HomeView(page, contactManager, route="/"))
             
-            if troute.match("/contacts/:service/:address"):
+            if troute.match("/contacts/all"):
+                page.views.append(AllContactsView(page, contactManager, route="/contacts/all"))
+            elif troute.match("/contacts/:service/:address"):
                 account = None
                 for a in contactManager.get_connected_accounts():
                     if a.service == troute.service and a.address == troute.address:

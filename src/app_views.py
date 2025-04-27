@@ -1,7 +1,7 @@
 import flet as ft
 import os
 from contact_manager import ContactManager
-from helpers import Account, searchContacts, sortContacts
+from helpers import Account, searchContacts, sortContacts, searchAccountContacts, sortAccountContacts
 
 class HomeView(ft.View):
     def __init__(self, page: ft.Page, contactManager: ContactManager, *args, **kwargs):
@@ -29,12 +29,26 @@ class HomeView(ft.View):
             ft.Row(
                 [
                     ft.Container(
-                        ft.Text(
-                            value="Your Backups",
-                            theme_style=ft.TextThemeStyle.HEADLINE_MEDIUM,
+                        ft.Row(
+                            [
+                                ft.Text(
+                                    value="Your Backups",
+                                    theme_style=ft.TextThemeStyle.HEADLINE_MEDIUM,
+                                ),
+                                ft.IconButton(
+                                    icon = ft.Icons.REFRESH,
+                                    tooltip = "Refresh Contact Backups",
+                                    on_click = self.refresh
+                                ),
+                                ft.IconButton(
+                                    icon = ft.Icons.PERSON_SEARCH,
+                                    tooltip = "Browse All Contacts",
+                                    on_click = self.open_all_contacts_page
+                                ),
+                            ]
                         ),
-                        expand=True,
                         padding=ft.padding.only(left=50, top=15),
+                        expand = True
                     ),
                     ft.Container(
                         ft.FilledTonalButton(
@@ -52,12 +66,18 @@ class HomeView(ft.View):
                         ),
                         padding=ft.padding.only(right=50, top=15),
                     )
-                ]
+                ],
             ),
             ft.Row([ft.Text("No connected accounts")]),
         ]
 
         self.load_account_cards()
+
+    def refresh(self, e):
+        self.contactManager.refresh()
+
+    def open_all_contacts_page(self, e):
+        self.page.go("/contacts/all")
 
     def open_account_contact_page(self, account: Account):
         self.page.go(f"/contacts/{account.service}/{account.address}")
@@ -231,8 +251,7 @@ class ContactsView(ft.View):
             self.searchBar.blur()
         self.searchBar = ft.SearchBar(
             full_screen=True,
-            bar_hint_text="Search conacts...",
-            view_hint_text="Search by name, email, phone number...",
+            bar_hint_text="Search contacts...",
             on_submit=on_search
             # on_tap=lambda _: self.searchBar.open_view()
         )
@@ -316,36 +335,35 @@ class ContactsView(ft.View):
         
         if len(loadedContacts) == 0:
             self.controls[-1] = ft.Row([ft.Text(noContactsText)])
-        else:
-            # Gets all account options.
-            def make_contact_list_tiles():
-                listTiles = []
-                for c in loadedContacts:
-                    listTiles.append(
-                        ft.ListTile(
-                            leading = ft.IconButton(
-                                icon = ft.Icons.SEARCH,
-                                icon_color = "blue200",
-                                tooltip = "View Contact",
-                                on_click = lambda _, contact=c: self.view_contact(contact)
-                            ),  
-                            title = ft.Text(c.full_name),
-                            trailing = ft.TextButton(
-                                text="Add to other Account",
-                                on_click=lambda _, contact=c : self.add_contact_dlg(contact)
-                            ),
-                            on_click = lambda _, contact=c: self.view_contact(contact),
-                        )
-                    )
-                return listTiles
-                                
+        else:                                
             self.controls[-1] = ft.ListView(
-                    make_contact_list_tiles(),
+                    self.make_contact_list_tiles(loadedContacts),
                     spacing = 2,
                     divider_thickness = 2,
                     expand = True ,
                 )
         self.page.update()
+
+    def make_contact_list_tiles(self, contacts):
+        listTiles = []
+        for c in contacts:
+            listTiles.append(
+                ft.ListTile(
+                    leading = ft.IconButton(
+                        icon = ft.Icons.SEARCH,
+                        icon_color = "blue200",
+                        tooltip = "View Contact",
+                        on_click = lambda _, contact=c: self.view_contact(contact)
+                    ),  
+                    title = ft.Text(c.full_name),
+                    trailing = ft.TextButton(
+                        text="Add to other Account",
+                        on_click=lambda _, contact=c : self.add_contact_dlg(contact)
+                    ),
+                    on_click = lambda _, contact=c: self.view_contact(contact),
+                )
+            )
+        return listTiles
     
   
 
@@ -408,7 +426,8 @@ class ContactsView(ft.View):
             ),
             content = ft.Column(
                 make_contact_body(),
-                spacing = 10
+                spacing = 10,
+                tight=True,
             ),
         )
         self.page.open(dialog)
@@ -434,3 +453,110 @@ class FileContactsView(ContactsView):
     
     def fetch_contact_list(self):
         return self.contactManager.get_file_contacts(self.filePath)
+
+class AllContactsView(ContactsView):
+    def __init__(self, page: ft.Page, contactManager: ContactManager, *args, **kwargs):
+        super().__init__(page, contactManager, *args, **kwargs)
+    
+    def add_contact_dlg(self, contact, account):
+        def close_dlg(e):
+            if dropdown_account.value is None:
+                dropdown_account.error_text = "Please select an account"
+                self.page.update()
+            else:
+                account_array = dropdown_account.value.split(',')
+                selected_account = Account(account_array[0], account_array[1], account_array[2])
+                if selected_account.address == account.address:
+                    dropdown_account.error_text = "Please select a different account"
+                    self.page.update()
+                else:
+                    self.contactManager.add_contact_to_account(account=selected_account, contact=contact)
+                    self.page.close(dialog)
+                
+        # Gets all account options.
+        def get_account_dropdown():
+            options = []
+            for account in self.contactManager.get_connected_accounts():
+                options.append(
+                    ft.DropdownOption(
+                        # key turns everything into string values, so cannot use the Account object.
+                        # We must turn it into a string instead that can be turned into a list.
+                        key = account.service + ',' + account.address + ',' + account.applicationPassword,
+                        text = account.address,
+                    )
+                )
+            return options
+        
+        dropdown_account = ft.Dropdown(
+            editable=False,
+            label="Accounts",
+            options=get_account_dropdown()
+        )
+
+
+        dialog = ft.AlertDialog(
+            title=ft.Text("Please select an account to add this contact to"),
+            content=ft.Column(
+                [
+                    dropdown_account
+                ],
+                tight=True,
+            ),
+            actions=[
+                ft.ElevatedButton(text="Connect", on_click=close_dlg)
+            ]
+        )
+        self.page.open(dialog)
+
+    def get_title(self):
+        return "Browing all contacts"
+    
+    def fetch_contact_list(self):
+        contacts = []
+        for account in self.contactManager.get_connected_accounts():
+            for contact in self.contactManager.get_account_contacts(account):
+                contacts.append((contact, account))
+        return contacts
+
+    def load_contacts(self, searchTerm = None):
+        noContactsText = "Your accounts have no contacts!"
+        if not self.contacts:
+            self.contacts = self.fetch_contact_list()
+            self.contacts = sortAccountContacts(self.contacts)
+        if searchTerm == None or searchTerm == "":
+            loadedContacts = self.contacts
+        else:
+            loadedContacts = searchAccountContacts(searchTerm, self.contacts)
+            noContactsText = "There are no contacts matching this search!"
+        
+        if len(loadedContacts) == 0:
+            self.controls[-1] = ft.Row([ft.Text(noContactsText)])
+        else:                                
+            self.controls[-1] = ft.ListView(
+                    self.make_contact_list_tiles(loadedContacts),
+                    spacing = 2,
+                    divider_thickness = 2,
+                    expand = True ,
+                )
+        self.page.update()
+
+    def make_contact_list_tiles(self, contacts):
+        listTiles = []
+        for c, a in contacts:
+            listTiles.append(
+                ft.ListTile(
+                    leading = ft.IconButton(
+                        icon = ft.Icons.SEARCH,
+                        icon_color = "blue200",
+                        tooltip = "View Contact",
+                        on_click = lambda _, contact=c: self.view_contact(contact)
+                    ),  
+                    title = ft.Text(f"{c.full_name} ({a.address})"),
+                    trailing = ft.TextButton(
+                        text="Add to other Account",
+                        on_click=lambda _, contact=c, account=a: self.add_contact_dlg(contact, account)
+                    ),
+                    on_click = lambda _, contact=c: self.view_contact(contact),
+                )
+            )
+        return listTiles
