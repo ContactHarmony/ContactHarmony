@@ -92,12 +92,15 @@ class HomeView(ft.View):
             else:
                 # when info entered & button clicked, attempt to fetch contacts.
                 #   on fail, do something. idk yet
+                dialog.actions[0] = ft.ProgressRing(width=16, height=16, stroke_width=2)
+                self.page.update()
                 result = self.contactManager.connect_account(Account(dropdownService.value, fieldEmail.value, fieldApplicationPassword.value))
                 if result == True:
                     self.page.close(dialog)
                     self.load_account_cards()
                     self.page.update()
                 else:
+                    dialog.actions[0] = ft.ElevatedButton(text="Connect", on_click=close_dlg)
                     fieldEmail.error_text = "Error, failed to fetch contacts"
                     fieldApplicationPassword.error_text = "Try a different e-mail or password"
                     self.page.update()
