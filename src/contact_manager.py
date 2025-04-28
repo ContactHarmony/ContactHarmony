@@ -7,6 +7,7 @@ import os
 from helpers import Account
 import getGoogleContacts as google
 import getYahooContacts as yahoo
+import getiCloudContacts as icloud
 from VCFparser import VCF_parser, ContactPhone, ContactEmail, Contact
 
 class ContactManager():
@@ -35,6 +36,8 @@ class ContactManager():
                 status = google.get_google_contacts(account.address, account.applicationPassword, backupDirectory, backupFileName)
             case "yahoo":
                 status = yahoo.get_yahoo_contacts(account.address, account.applicationPassword, backupDirectory, backupFileName)
+            case "icloud":
+                status = icloud.get_icloud_contacts(account.address, account.applicationPassword, backupDirectory, backupFileName)
             case _:
                 raise Exception(f"{account.service} support not implemented!")
         
@@ -50,7 +53,7 @@ class ContactManager():
         
     def get_supported_services(self):
         '''return a list of supported services'''
-        return ['google', 'yahoo'] #TODO change to return ['google', 'yahoo', 'icloud']
+        return ['google', 'yahoo', 'icloud'] #TODO change to return ['google', 'yahoo', 'icloud']
 
     def get_connected_accounts(self):
         '''returns a list of connected accounts'''
