@@ -8,22 +8,21 @@ from contact_manager import ContactManager
 import VCFparser as vcfp
 
 ACCOUNT_GOOGLE_INVALID = Account('google', 'fake_email@fake.com', 'rweqhgdfsamvb432')
-ACCOUNT_GOOGLE_VALID = Account('google', 'd6genis@gmail.com', 'thyyjvntdrkfydhn')
+ACCOUNT_GOOGLE_VALID = Account('google', 'contactharmony.test@gmail.com', 'ihamkmcqkjjbflxk')
 
 ACCOUNT_YAHOO_INVALID = Account('yahoo', 'fake_email@yahoo.com', 'rweqhgdfsamvb432')
 ACCOUNT_YAHOO_VALID = Account('yahoo', 'contactharmony@yahoo.com', 'fxhakkkkcriljlhj')
 
 SAMPLE_VCARD = """BEGIN:VCARD
 VERSION:3.0
-N:Fakename;Stacey;;;
-FN:Stacey Fakename
-REV:2025-03-19T19:25:20Z
-UID:32c9e360b37a10e
-BDAY;VALUE=DATE:1921-06-12
-item2.TEL;TYPE=PREF:+9312345678900
-item1.EMAIL;TYPE=PREF:fake@fake.com
-item1.X-ABLabel:
-item2.X-ABLabel:
+N:Test;Johnny;;;
+FN:Johnny Test
+REV:2025-04-26T16:56:19Z
+UID:481685e98bfc8378
+BDAY;VALUE=DATE:2002-12-05
+TEL;TYPE=PREF:+19013004101
+EMAIL;TYPE=PREF:justtesting@yahoo.com
+NOTE:Note!
 END:VCARD\n"""
 
 SAMPLE_VCARD_NO_FN = """BEGIN:VCARD
@@ -46,6 +45,20 @@ BDAY;VALUE=date:2002-12-05
 NOTE:Note!
 EMAIL;TYPE=INTERNET:johnny_test@student.uml.edu
 EMAIL;TYPE=INTERNET:justtesting@yahoo.com
+TEL:+19013004101
+REV:2025-04-02T20:52:45Z
+UID:contactharmony:2
+END:VCARD\n"""
+
+# This alternate is needed because the two email fields are sometimes swapped
+SAMPLE_VCARD_YAHOO_ALT = """BEGIN:VCARD
+VERSION:3.0
+FN:Johnny Test
+N:Test;Johnny;;;
+BDAY;VALUE=date:2002-12-05
+NOTE:Note!
+EMAIL;TYPE=INTERNET:justtesting@yahoo.com
+EMAIL;TYPE=INTERNET:johnny_test@student.uml.edu
 TEL:+19013004101
 REV:2025-04-02T20:52:45Z
 UID:contactharmony:2
@@ -77,8 +90,8 @@ class TestGoogle():
 
     def test_fetch_contacts_list_correct_info(self):
         hrefs_test = google.fetch_contacts_list(ACCOUNT_GOOGLE_VALID.address, ACCOUNT_GOOGLE_VALID.applicationPassword)
-        assert hrefs_test == ['/carddav/v1/principals/d6genis@gmail.com/lists/default/',
-                            '/carddav/v1/principals/d6genis@gmail.com/lists/default/32c9e360b37a10e']
+        assert hrefs_test == ['/carddav/v1/principals/contactharmony.test@gmail.com/lists/default/',
+                            '/carddav/v1/principals/contactharmony.test@gmail.com/lists/default/481685e98bfc8378']
 
 class TestContactManager():
     def test_connecting_invalid_account_should_fail(self, tmp_path):
@@ -166,15 +179,15 @@ class TestVCFparser():
         test_parser = vcfp.VCF_parser()
         test_parser.parse("BEGIN:VCARD\nEND:VCARD")
         test_contact_output = test_parser.parse(SAMPLE_VCARD)
-        assert test_contact_output[1].first_name == 'Stacey'
-        assert test_contact_output[1].last_name == 'Fakename'
-        assert test_contact_output[1].full_name == 'Stacey Fakename'
-        assert test_contact_output[1].phones[0].number == '+9312345678900'
-        assert test_contact_output[1].emails[0].email == 'fake@fake.com'
+        assert test_contact_output[1].first_name == 'Johnny'
+        assert test_contact_output[1].last_name == 'Test'
+        assert test_contact_output[1].full_name == 'Johnny Test'
+        assert test_contact_output[1].phones[0].number == '+19013004101'
+        assert test_contact_output[1].emails[0].email == 'justtesting@yahoo.com'
         assert test_contact_output[1].organization == ''
         assert test_contact_output[1].title == ''
-        assert test_contact_output[1].note == ''
-        assert test_contact_output[1].birthday == '1921-06-12'
+        assert test_contact_output[1].note == 'Note!'
+        assert test_contact_output[1].birthday == '2002-12-05'
 
 class TestYahoo():
     def test_get_yahoo_contacts(self, tmp_path):
@@ -192,7 +205,7 @@ class TestYahoo():
     def test_get_yahoo_contacts_correct_backup(self):
         dir = './backups'
         yahoo.get_yahoo_contacts(ACCOUNT_YAHOO_VALID.address, ACCOUNT_YAHOO_VALID.applicationPassword, dir, 'temp.vcf')
-        assert open(os.path.join(dir, 'temp.vcf')).read() == SAMPLE_VCARD_YAHOO
+        assert open(os.path.join(dir, 'temp.vcf')).read() == SAMPLE_VCARD_YAHOO or open(os.path.join(dir, 'temp.vcf')).read() == SAMPLE_VCARD_YAHOO_ALT
         os.remove(os.path.join(dir, 'temp.vcf'))
     
     def test_yahoo_fetch_contacts_correct_info(self):
