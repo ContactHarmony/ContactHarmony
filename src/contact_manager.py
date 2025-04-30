@@ -10,12 +10,13 @@ import getYahooContacts as yahoo
 from VCFparser import VCF_parser, ContactPhone, ContactEmail, Contact
 
 class ContactManager():
-    def __init__(self, backup_dir = "./backups"):
+    def __init__(self, backup_dir = "./backups", saving=False):
         self.defaultBackupDir = backup_dir
         self.connectedAccounts = {}
         self.credentials_file = "./credentials.json"
         self._masterPass = "d04kcirid98cn@#"
         self.fileLook = ""
+        self.saving = saving
     
     def connect_account(self, account: Account):
         '''attempt to connect an account to the ContactManager.'''
@@ -42,7 +43,8 @@ class ContactManager():
 
         if status == True:
             self.connectedAccounts[account] = newPath
-            self.save_credentials()
+            if self.saving:
+                self.save_credentials()
         else:
             if os.path.exists(newPath) and not refresh:
                 os.remove(newPath)   #TODO if used on existing account, return to previous version
@@ -81,7 +83,8 @@ class ContactManager():
         if account in self.connectedAccounts:
             os.remove(self.connectedAccounts[account])
             del self.connectedAccounts[account]
-            self.save_credentials()
+            if self.saving:
+                self.save_credentials()
         
     def generate_key(self, password: str, salt: bytes) -> bytes:
         '''Generate encryption key from password and salt'''

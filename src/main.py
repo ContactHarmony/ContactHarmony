@@ -10,7 +10,7 @@ if __name__ == "__main__":
         
         page.title = "Contact Harmony"
         page.update()
-        contactManager = ContactManager()
+        contactManager = ContactManager(saving=True)
 
         testGoogleAccount = Account("google", "contactharmony.test@gmail.com", "iham kmcq kjjb flxk")
         testYahooAccount = Account("yahoo", "contactharmony@yahoo.com", "fxhakkkkcriljlhj")
