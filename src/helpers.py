@@ -14,22 +14,28 @@ class Account():
     
 def searchContacts(searchTerm: str, contacts: list[Contact]):
     searchTerm = searchTerm.lower()
-    MINRATIO = 85
+    MINRATIO = 80
     
     matchRatios = []
     for c in contacts:
         contactNames = c.full_name.lower().split()
+        searchNames = searchTerm.split()
 
         ratio = 0
         priority = 0
-        for index, contactStr in enumerate(contactNames):
-            currentRatio = fuzz.partial_ratio(searchTerm, contactStr)
-            if currentRatio > ratio:
-                ratio = currentRatio
-                priority = len(contactNames) - index
+        for i, contactStr in enumerate(contactNames):
+            for j, searchStr in enumerate(searchNames): 
+                if searchStr <= contactStr:
+                    currentRatio = fuzz.partial_ratio(searchStr, contactStr)
+                else:
+                    currentRatio = fuzz.ratio(searchStr, contactStr)
+                
+                if currentRatio > ratio:
+                    ratio = currentRatio
+                    priority = 1 if i == 0 else 0
 
         if ratio >= MINRATIO:
-            print(f"Contact: {c.full_name}, Ratio: {ratio}")
+            # print(f"Contact: {c.full_name}, Ratio: {ratio}")
             matchRatios.append((c, ratio, priority))
 
     matchRatios.sort(key=lambda m: (m[1], m[2]), reverse=True)
@@ -39,23 +45,28 @@ def searchContacts(searchTerm: str, contacts: list[Contact]):
 
 def searchAccountContacts(searchTerm: str, contacts: list[tuple[Contact, Account]]):
     searchTerm = searchTerm.lower()
-    MINRATIO = 85
+    MINRATIO = 80
     
     matchRatios = []
     for c in contacts:
         contactNames = c[0].full_name.lower().split()
+        searchNames = searchTerm.split()
 
         ratio = 0
         priority = 0
-        for index, contactStr in enumerate(contactNames):
-            currentRatio = fuzz.partial_ratio(searchTerm, contactStr)
-            if currentRatio > ratio:
-                ratio = currentRatio
-                priority = len(contactNames) - index
+        for i, contactStr in enumerate(contactNames):
+            for j, searchStr in enumerate(searchNames): 
+                if searchStr <= contactStr:
+                    currentRatio = fuzz.partial_ratio(searchStr, contactStr)
+                else:
+                    currentRatio = fuzz.ratio(searchStr, contactStr)
+                
+                if currentRatio > ratio:
+                    ratio = currentRatio
+                    priority = 1 if i == 0 else 0
             
-        
         if ratio >= MINRATIO:
-            print(f"Contact: {c[0].full_name}, Ratio: {ratio}")
+            # print(f"Contact: {c[0].full_name}, Ratio: {ratio}")
             matchRatios.append((c, ratio, priority))
 
     matchRatios.sort(key=lambda m: (m[1], m[2]), reverse=True)
